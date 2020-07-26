@@ -1,2 +1,4 @@
-/node_modules
-lib/
+out
+node_modules
+.vscode-test/
+*.vsix

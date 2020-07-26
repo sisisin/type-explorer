@@ -1,13 +1,12 @@
 {
   "compilerOptions": {
-    "target": "es2020",
     "module": "commonjs",
-    "outDir": "./lib",
-    "rootDir": "./src",
-    "strict": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true
+    "target": "es6",
+    "outDir": "out",
+    "lib": ["es6"],
+    "sourceMap": true,
+    "rootDir": "src",
+    "strict": true
   },
-  "include": ["src"]
+  "exclude": ["node_modules", ".vscode-test", "sample-project"]
 }

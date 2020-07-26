@@ -1,5 +1,5 @@
 import { Project, SourceFile, TypeGuards, ts, Type, PropertySignature } from 'ts-morph';
-import path from 'path';
+import * as path from 'path';
 
 const p = new Project({
   tsConfigFilePath: path.resolve(__dirname, '../sample-project/tsconfig.json'),
