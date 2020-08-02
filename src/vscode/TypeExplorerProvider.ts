@@ -3,7 +3,7 @@ import { TreeNode } from '../types';
 
 function find(label: string, target: TreeNode[]): TreeNode | undefined {
   for (const t of target) {
-    if (t.label === label) return t;
+    if (t.variableName === label) return t;
     if (t.children) {
       const result = find(label, t.children);
       if (result) return result;
@@ -23,7 +23,7 @@ export class TypeExplorerProvider implements vscode.TreeDataProvider<Type> {
     if (element === undefined) {
       return [
         new Type(
-          this.treeNode.label,
+          this.treeNode.variableName,
           this.treeNode.typeName,
           vscode.TreeItemCollapsibleState.Collapsed,
         ),
@@ -33,7 +33,7 @@ export class TypeExplorerProvider implements vscode.TreeDataProvider<Type> {
     return children.map(
       (n) =>
         new Type(
-          n.label,
+          n.variableName,
           n.typeName,
           (n.children ?? []).length > 0
             ? vscode.TreeItemCollapsibleState.Collapsed

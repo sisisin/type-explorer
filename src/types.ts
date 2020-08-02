@@ -1,5 +1,6 @@
 export type TreeNode = {
-  label: string;
+  id: number;
+  variableName: string;
   typeName: string | undefined;
   children?: TreeNode[];
 };

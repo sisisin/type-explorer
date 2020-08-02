@@ -1,29 +1,34 @@
 import { TreeNode } from '../types';
 
 export const treeObj: TreeNode = {
-  label: 'Foo',
+  id: 1,
+  variableName: 'Foo',
   typeName: undefined,
   children: [
     {
-      label: 'x',
+      id: 2,
+      variableName: 'x',
       typeName: 'string',
     },
     {
-      label: 'bar',
+      id: 3,
+      variableName: 'bar',
       typeName: 'Bar',
       children: [
         {
-          label: 'a',
+          id: 4,
+          variableName: 'a',
           typeName: 'string[] | string',
           children: [
-            { label: 'string[]', typeName: 'string[]' },
-            { label: 'string', typeName: 'string' },
+            { id: 5, variableName: 'string[]', typeName: 'string[]' },
+            { id: 6, variableName: 'string', typeName: 'string' },
           ],
         },
         {
-          label: 'baz',
+          id: 7,
+          variableName: 'baz',
           typeName: 'Baz',
-          children: [{ label: 'number', typeName: undefined }],
+          children: [{ id: 8, variableName: 'number', typeName: undefined }],
         },
       ],
     },

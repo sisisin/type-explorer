@@ -8,27 +8,33 @@ export function makeTree(src: SourceFile, pos: number) {
     console.log('invalid type: ', child?.getType().getText());
     return;
   }
-  return makeTypeTree(propertySignature);
+  const genId = (() => {
+    let id = 0;
+    return () => ++id;
+  })();
+  return makeTypeTree(genId, propertySignature);
 }
 
-function makeTypeTree(node: PropertySignature): TreeNode | undefined {
-  const label = node.getName();
+function makeTypeTree(genId: () => number, node: PropertySignature): TreeNode | undefined {
+  const variableName = node.getName();
   const typeNode = node.getTypeNode();
   const typeName = typeNode?.getText();
 
-  const base: TreeNode = { label, typeName };
+  const base: Omit<TreeNode, 'id'> = { variableName, typeName };
 
   if (!Node.isTypeReferenceNode(typeNode!)) {
-    return base;
+    return { id: genId(), ...base };
   } else {
     const type = node.getType();
     // Case of {node: Foo} and type Foo = [primitive type]
     if (isPrimitiveType(type)) {
       return {
+        id: genId(),
         ...base,
         children: [
           {
-            label: type.getText(),
+            id: genId(),
+            variableName: type.getText(),
             typeName: type.getText(),
           },
         ],
@@ -39,16 +45,18 @@ function makeTypeTree(node: PropertySignature): TreeNode | undefined {
       .map((prop) => {
         const d = prop.getValueDeclaration();
         if (d && Node.isPropertySignature(d!)) {
-          return makeTypeTree(d);
+          return makeTypeTree(genId, d);
         } else {
           return {
-            label: prop.getName(),
+            id: genId(),
+            variableName: prop.getName(),
             typeName: d?.getType().getText(),
           };
         }
       })
       .filter((n): n is NonNullable<typeof n> => n !== undefined);
     return {
+      id: genId(),
       ...base,
       children,
     };

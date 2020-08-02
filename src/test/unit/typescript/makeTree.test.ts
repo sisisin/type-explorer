@@ -14,23 +14,23 @@ beforeEach(() => {
 });
 it('should make tree', () => {
   const result = makeTree(f, 27);
-  expect(result).toStrictEqual({ label: 'foo', typeName: 'number | number[]' });
+  expect(result).toMatchObject({ variableName: 'foo', typeName: 'number | number[]' });
 });
 
 it('should make nested tree', () => {
   const result = makeTree(f, 52);
-  const expected: TreeNode = {
-    label: 'bar',
+  const expected = {
+    variableName: 'bar',
     typeName: 'BarObject',
     children: [
-      { label: 'a', typeName: 'number' },
-      { label: 'b', typeName: 'string' },
+      { variableName: 'a', typeName: 'number' },
+      { variableName: 'b', typeName: 'string' },
       {
-        label: 'c',
+        variableName: 'c',
         typeName: 'AliasOfBoolean',
-        children: [{ label: 'boolean', typeName: 'boolean' }],
+        children: [{ variableName: 'boolean', typeName: 'boolean' }],
       },
     ],
   };
-  expect(result).toStrictEqual(expected);
+  expect(result).toMatchObject(expected);
 });
