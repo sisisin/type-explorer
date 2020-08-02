@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { provideTree } from './typescript/makeTree';
+import { provideTree } from './vscode/provideTree';
 
 export function activate(context: vscode.ExtensionContext) {
   const provideTreeSubs = vscode.window.onDidChangeTextEditorSelection((e) => {
