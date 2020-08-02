@@ -2,8 +2,8 @@ import { TreeNode } from '../types';
 
 export const treeObj: TreeNode = {
   id: 1,
-  variableName: 'Foo',
-  typeName: undefined,
+  variableName: undefined,
+  typeName: 'Foo',
   children: [
     {
       id: 2,
@@ -20,15 +20,15 @@ export const treeObj: TreeNode = {
           variableName: 'a',
           typeName: 'string[] | string',
           children: [
-            { id: 5, variableName: 'string[]', typeName: 'string[]' },
-            { id: 6, variableName: 'string', typeName: 'string' },
+            { id: 5, variableName: undefined, typeName: 'string[]' },
+            { id: 6, variableName: undefined, typeName: 'string' },
           ],
         },
         {
           id: 7,
           variableName: 'baz',
           typeName: 'Baz',
-          children: [{ id: 8, variableName: 'number', typeName: undefined }],
+          children: [{ id: 8, variableName: undefined, typeName: 'number' }],
         },
       ],
     },

@@ -18,7 +18,7 @@ export function makeTree(src: SourceFile, pos: number) {
 function makeTypeTree(genId: () => number, node: PropertySignature): TreeNode | undefined {
   const variableName = node.getName();
   const typeNode = node.getTypeNode();
-  const typeName = typeNode?.getText();
+  const typeName = typeNode?.getText() ?? node.getType().getText();
 
   const base: Omit<TreeNode, 'id'> = { variableName, typeName };
 
@@ -50,7 +50,7 @@ function makeTypeTree(genId: () => number, node: PropertySignature): TreeNode | 
           return {
             id: genId(),
             variableName: prop.getName(),
-            typeName: d?.getType().getText(),
+            typeName: d?.getType().getText() ?? 'd is undefined(todo)',
           };
         }
       })

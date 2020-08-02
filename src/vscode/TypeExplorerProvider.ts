@@ -37,16 +37,15 @@ export class TypeExplorerProvider implements vscode.TreeDataProvider<Type> {
 }
 
 class Type extends vscode.TreeItem {
-  readonly label: string;
   readonly id: string;
-  private readonly variableName: string;
-  private readonly typeName: string | undefined;
+  readonly label: string;
+  private readonly variableName: string | undefined;
   constructor(
     readonly node: TreeNode,
     public readonly collapsibleState: vscode.TreeItemCollapsibleState,
   ) {
-    super(node.typeName ?? '', collapsibleState);
-    this.label = node.typeName ?? '';
+    super(node.typeName, collapsibleState);
+    this.label = node.typeName;
     this.id = node.id.toString();
     this.variableName = node.variableName;
   }
@@ -54,6 +53,6 @@ class Type extends vscode.TreeItem {
     return this.variableName ?? '';
   }
   get tooltip() {
-    return `${this.variableName}: ${this.typeName}`;
+    return `${this.variableName}: ${this.label}`;
   }
 }
