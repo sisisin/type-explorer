@@ -15,6 +15,10 @@ export const treeObj: TreeNode = {
         {
           label: 'a',
           typeName: 'string[] | string',
+          children: [
+            { label: 'string[]', typeName: 'string[]' },
+            { label: 'string', typeName: 'string' },
+          ],
         },
         {
           label: 'baz',

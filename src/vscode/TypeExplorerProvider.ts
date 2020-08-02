@@ -4,12 +4,17 @@ import { TreeNode } from '../types';
 function find(label: string, target: TreeNode[]): TreeNode | undefined {
   for (const t of target) {
     if (t.label === label) return t;
-    if (t.children) return find(label, t.children);
+    if (t.children) {
+      const result = find(label, t.children);
+      if (result) return result;
+    }
   }
   return undefined;
 }
 export class TypeExplorerProvider implements vscode.TreeDataProvider<Type> {
-  constructor(private treeNode: TreeNode) {}
+  constructor(private treeNode: TreeNode) {
+    // this.treeNode = treeObj;
+  }
   // onDidChangeTreeData?: vscode.Event<void | Type | null | undefined> | undefined;
   getTreeItem(element: Type): vscode.TreeItem | Thenable<vscode.TreeItem> {
     return element;
@@ -24,13 +29,13 @@ export class TypeExplorerProvider implements vscode.TreeDataProvider<Type> {
         ),
       ];
     }
-    const children = find(element.label, [this.treeNode])?.children ?? [];
+    const children = find(element.id, [this.treeNode])?.children ?? [];
     return children.map(
       (n) =>
         new Type(
           n.label,
           n.typeName,
-          n.children
+          (n.children ?? []).length > 0
             ? vscode.TreeItemCollapsibleState.Collapsed
             : vscode.TreeItemCollapsibleState.None,
         ),
@@ -40,16 +45,18 @@ export class TypeExplorerProvider implements vscode.TreeDataProvider<Type> {
 
 class Type extends vscode.TreeItem {
   readonly label: string;
+  readonly id: string;
   constructor(
     private readonly variableName: string,
     private readonly typeName: string | undefined,
     public readonly collapsibleState: vscode.TreeItemCollapsibleState,
   ) {
     super(variableName, collapsibleState);
-    this.label = variableName;
+    this.label = typeName ?? '';
+    this.id = variableName;
   }
   get description() {
-    return this.typeName ?? '';
+    return this.variableName ?? '';
   }
   get tooltip() {
     return `${this.variableName}: ${this.typeName}`;
