@@ -2,6 +2,7 @@
   "name": "type-explorer",
   "displayName": "type-explorer",
   "description": "",
+  "license": "MIT",
   "version": "0.0.1",
   "engines": {
     "vscode": "^1.47.0"
@@ -12,7 +13,8 @@
   "activationEvents": [
     "onCommand:type-explorer.helloWorld",
     "onLanguage:typescript",
-    "onLanguage:typescriptreact"
+    "onLanguage:typescriptreact",
+    "onView:typeExplorerView"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -20,13 +22,26 @@
       "activitybar": [
         {
           "id": "typeExplorerView",
-          "name": "Type Explorer",
-          "icon": "media/dep.svg",
-          "title": "Type Exp"
+          "icon": "assets/vscode-icons/light/list-tree.svg",
+          "title": "Type Explorer"
         }
       ]
     },
+    "viewsWelcome": [
+      {
+        "view": "typeExplorerView",
+        "contents": "focus on property in TypeScript file"
+      }
+    ],
     "views": {
+      "typeExplorerView": [
+        {
+          "id": "typeExplorerView",
+          "name": "",
+          "icon": "assets/vscode-icons/light/list-tree.svg",
+          "contextualTitle": "Type Explorer Title"
+        }
+      ],
       "explorer": [
         {
           "id": "typeExplorer",

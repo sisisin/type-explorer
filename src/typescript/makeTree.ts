@@ -15,11 +15,13 @@ export async function provideTree(context: vscode.ExtensionContext, editor: vsco
   const pos = await getPos(targetFile, editor.selection.active);
 
   const typeTree = makeTree(f, pos);
-  const treeDataDisposable = vscode.window.registerTreeDataProvider(
-    'typeExplorer',
-    new TypeExplorerProvider(typeTree!),
-  );
+  const provider = new TypeExplorerProvider(typeTree!);
+  const treeDataDisposable = vscode.window.registerTreeDataProvider('typeExplorer', provider);
   context.subscriptions.push(treeDataDisposable);
+  const treeViewDisposable = vscode.window.createTreeView('typeExplorerView', {
+    treeDataProvider: provider,
+  });
+  context.subscriptions.push(treeViewDisposable);
 }
 
 function makeTree(src: SourceFile, pos: number) {
