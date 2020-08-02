@@ -11,7 +11,6 @@
     "Other"
   ],
   "activationEvents": [
-    "onCommand:type-explorer.helloWorld",
     "onLanguage:typescript",
     "onLanguage:typescriptreact",
     "onView:typeExplorerView"
@@ -49,12 +48,7 @@
         }
       ]
     },
-    "commands": [
-      {
-        "command": "type-explorer.helloWorld",
-        "title": "Hello World"
-      }
-    ]
+    "commands": []
   },
   "scripts": {
     "vscode:prepublish": "yarn run compile",
