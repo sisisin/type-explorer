@@ -1,8 +1,7 @@
-import { makeTree } from '../../../typescript/makeTree';
-import { Project, SourceFile } from 'ts-morph';
 import * as path from 'path';
-import * as assert from 'assert';
+import { Project, SourceFile } from 'ts-morph';
 import { TreeNode } from '../../../types';
+import { makeTree } from '../../../typescript/makeTree';
 
 let p: Project;
 let f: SourceFile;
@@ -15,7 +14,7 @@ beforeEach(() => {
 });
 it('should make tree', () => {
   const result = makeTree(f, 27);
-  assert.deepStrictEqual(result, { label: 'foo', typeName: 'number | number[]' });
+  expect(result).toStrictEqual({ label: 'foo', typeName: 'number | number[]' });
 });
 
 it('should make nested tree', () => {
@@ -33,5 +32,5 @@ it('should make nested tree', () => {
       },
     ],
   };
-  assert.deepStrictEqual(result, expected);
+  expect(result).toStrictEqual(expected);
 });
