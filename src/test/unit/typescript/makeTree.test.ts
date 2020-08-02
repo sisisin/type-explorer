@@ -14,7 +14,10 @@ beforeEach(() => {
 });
 it('should make tree', () => {
   const result = makeTree(f, 27);
-  expect(result).toMatchObject({ variableName: 'foo', typeName: 'number | number[]' });
+  expect(result).toMatchObject({
+    variableName: 'foo',
+    typeName: 'number | number[]',
+  });
 });
 
 it('should make nested tree', () => {
