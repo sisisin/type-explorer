@@ -1,11 +1,11 @@
 import * as vscode from 'vscode';
 import { TreeNode } from '../types';
 
-function find(label: string, target: TreeNode[]): TreeNode | undefined {
+function find(id: string, target: TreeNode[]): TreeNode | undefined {
   for (const t of target) {
-    if (t.variableName === label) return t;
+    if (t.id.toString() === id) return t;
     if (t.children) {
-      const result = find(label, t.children);
+      const result = find(id, t.children);
       if (result) return result;
     }
   }
@@ -21,20 +21,13 @@ export class TypeExplorerProvider implements vscode.TreeDataProvider<Type> {
   }
   getChildren(element?: Type | undefined): vscode.ProviderResult<Type[]> {
     if (element === undefined) {
-      return [
-        new Type(
-          this.treeNode.variableName,
-          this.treeNode.typeName,
-          vscode.TreeItemCollapsibleState.Collapsed,
-        ),
-      ];
+      return [new Type(this.treeNode, vscode.TreeItemCollapsibleState.Collapsed)];
     }
     const children = find(element.id, [this.treeNode])?.children ?? [];
     return children.map(
       (n) =>
         new Type(
-          n.variableName,
-          n.typeName,
+          n,
           (n.children ?? []).length > 0
             ? vscode.TreeItemCollapsibleState.Collapsed
             : vscode.TreeItemCollapsibleState.None,
@@ -46,14 +39,16 @@ export class TypeExplorerProvider implements vscode.TreeDataProvider<Type> {
 class Type extends vscode.TreeItem {
   readonly label: string;
   readonly id: string;
+  private readonly variableName: string;
+  private readonly typeName: string | undefined;
   constructor(
-    private readonly variableName: string,
-    private readonly typeName: string | undefined,
+    readonly node: TreeNode,
     public readonly collapsibleState: vscode.TreeItemCollapsibleState,
   ) {
-    super(variableName, collapsibleState);
-    this.label = typeName ?? '';
-    this.id = variableName;
+    super(node.typeName ?? '', collapsibleState);
+    this.label = node.typeName ?? '';
+    this.id = node.id.toString();
+    this.variableName = node.variableName;
   }
   get description() {
     return this.variableName ?? '';
