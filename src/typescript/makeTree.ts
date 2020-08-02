@@ -1,16 +1,15 @@
-import { getPos } from '../getPos';
+import { Node, Project, PropertySignature, SourceFile, ts, Type } from 'ts-morph';
 import * as vscode from 'vscode';
-import { Project, SourceFile, ts, Type, PropertySignature, Node } from 'ts-morph';
-import * as path from 'path';
-import { TypeExplorerProvider } from '../vscode/TypeExplorerProvider';
+import { findTsconfigFile } from '../file-utils/findTsconfigFile';
+import { getPos } from '../file-utils/getPos';
 import { TreeNode } from '../types';
+import { TypeExplorerProvider } from '../vscode/TypeExplorerProvider';
 
 export async function provideTree(context: vscode.ExtensionContext, editor: vscode.TextEditor) {
-  // todo: detect tsconfig file dynamically
-  const p = new Project({
-    tsConfigFilePath: path.resolve(__dirname, '../../sample-project/tsconfig.json'),
-  });
   const targetFile = editor.document.uri.fsPath;
+  const p = new Project({
+    tsConfigFilePath: await findTsconfigFile(targetFile),
+  });
   const f = p.getSourceFile(targetFile)!;
   const pos = await getPos(targetFile, editor.selection.active);
 
