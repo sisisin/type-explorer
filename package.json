@@ -1,15 +1,79 @@
 {
   "name": "type-explorer",
-  "version": "1.0.0",
-  "main": "index.js",
+  "displayName": "type-explorer",
+  "description": "",
   "license": "MIT",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.47.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onLanguage:typescript",
+    "onLanguage:typescriptreact",
+    "onView:typeExplorerView"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "typeExplorerView",
+          "icon": "assets/vscode-icons/light/list-tree.svg",
+          "title": "Type Explorer"
+        }
+      ]
+    },
+    "viewsWelcome": [
+      {
+        "view": "typeExplorerView",
+        "contents": "focus on property in TypeScript file"
+      }
+    ],
+    "views": {
+      "typeExplorerView": [
+        {
+          "id": "typeExplorerView",
+          "name": "",
+          "icon": "assets/vscode-icons/light/list-tree.svg",
+          "contextualTitle": "Type Explorer Title"
+        }
+      ],
+      "explorer": [
+        {
+          "id": "typeExplorer",
+          "name": "Type Explorer"
+        }
+      ]
+    },
+    "commands": []
+  },
   "scripts": {
-    "start": "ts-node ./src/index.ts"
+    "vscode:prepublish": "yarn run compile",
+    "compile": "tsc -p ./",
+    "lint": "eslint --ext js,ts .",
+    "watch": "tsc -watch -p ./",
+    "pretest": "yarn run compile && yarn run lint",
+    "test": "node ./out/test/runTest.js"
   },
   "devDependencies": {
-    "@types/node": "^14.0.26",
+    "@types/glob": "^7.1.1",
+    "@types/mocha": "^7.0.2",
+    "@types/node": "^13.11.0",
+    "@types/vscode": "^1.47.0",
+    "@typescript-eslint/eslint-plugin": "^3.7.0",
+    "@typescript-eslint/parser": "^3.7.0",
+    "eslint": "^6.8.0",
+    "eslint-config-prettier": "^6.11.0",
+    "eslint-plugin-prettier": "^3.1.4",
+    "glob": "^7.1.6",
+    "mocha": "^7.1.2",
+    "prettier": "^2.0.5",
     "ts-node": "^8.10.2",
-    "typescript": "^3.9.7"
+    "typescript": "^3.8.3",
+    "vscode-test": "^1.3.0"
   },
   "dependencies": {
     "ts-morph": "^7.1.3"
