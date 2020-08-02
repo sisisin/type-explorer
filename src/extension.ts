@@ -1,7 +1,7 @@
 // The module 'vscode' contains the VS Code extensibility API
 // Import the module and reference it with the alias vscode in your code below
 import * as vscode from 'vscode';
-import { TypeExplorerProvider } from './tree';
+import { provideTree } from './typescript/makeTree';
 
 // this method is called when your extension is activated
 // your extension is activated the very first time the command is executed
@@ -18,9 +18,17 @@ export function activate(context: vscode.ExtensionContext) {
 
     // Display a message box to the user
     vscode.window.showInformationMessage('Hello World from type-explorer!');
+    const editor = vscode.window.activeTextEditor;
+    if (editor?.selection.isEmpty) {
+      provideTree(context, editor);
+    }
   });
 
-  vscode.window.registerTreeDataProvider('typeExplorer', new TypeExplorerProvider());
+  vscode.window.onDidChangeTextEditorSelection((e) => {
+    if (e.textEditor.selection.isEmpty) {
+      provideTree(context, e.textEditor);
+    }
+  });
 
   context.subscriptions.push(disposable);
 }
