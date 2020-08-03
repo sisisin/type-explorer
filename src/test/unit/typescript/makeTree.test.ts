@@ -20,3 +20,7 @@ it('should make tree from PropertySignature', () => {
   const result = makeTree(f, 52);
   expect(result).toMatchSnapshot();
 });
+
+it('should make tree from Alias to primitive Type', () => {
+  expect(makeTree(f, 164)).toMatchSnapshot();
+});

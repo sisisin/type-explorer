@@ -1,5 +1,14 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`should make tree from Alias to primitive Type 1`] = `
+Object {
+  "children": Array [],
+  "id": 1,
+  "typeName": "AliasOfBoolean",
+  "variableName": undefined,
+}
+`;
+
 exports[`should make tree from PropertySignature 1`] = `
 Object {
   "children": Array [
