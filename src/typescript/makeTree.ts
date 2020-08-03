@@ -25,13 +25,16 @@ type TreeableNode = PropertySignature | TypeAliasDeclaration;
 function makeTypeTree(genId: () => number, node: TreeableNode): TreeNode | undefined {
   const typeNode = node.getTypeNode();
 
-  if (Node.isTypeReferenceNode(typeNode!)) {
+  if (typeNode === undefined) {
+    return { id: genId(), ...getNames(node) };
+  }
+  if (Node.isTypeReferenceNode(typeNode)) {
     return fromTypeReferenceNode(genId, node);
-  } else if (Node.isUnionTypeNode(typeNode!)) {
+  } else if (Node.isUnionTypeNode(typeNode)) {
     // todo
     return { id: genId(), ...getNames(node) };
   } else if (Node.isTypeAliasDeclaration(node)) {
-    const children: TreeNode[] = !Node.isTypeElementMemberedNode(typeNode!)
+    const children: TreeNode[] = !Node.isTypeElementMemberedNode(typeNode)
       ? []
       : typeNode
           .getProperties()
