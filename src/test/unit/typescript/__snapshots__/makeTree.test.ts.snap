@@ -1,0 +1,77 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`should make tree from PropertySignature 1`] = `
+Object {
+  "children": Array [
+    Object {
+      "id": 1,
+      "typeName": "number",
+      "variableName": "a",
+    },
+    Object {
+      "id": 2,
+      "typeName": "string",
+      "variableName": "b",
+    },
+    Object {
+      "children": Array [
+        Object {
+          "id": 4,
+          "typeName": "boolean",
+          "variableName": "boolean",
+        },
+      ],
+      "id": 3,
+      "typeName": "AliasOfBoolean",
+      "variableName": "c",
+    },
+  ],
+  "id": 5,
+  "typeName": "BarObject",
+  "variableName": "bar",
+}
+`;
+
+exports[`should make tree from TypeAliasDeclaration 1`] = `
+Object {
+  "children": Array [
+    Object {
+      "id": 1,
+      "typeName": "number | number[]",
+      "variableName": "foo",
+    },
+    Object {
+      "children": Array [
+        Object {
+          "id": 2,
+          "typeName": "number",
+          "variableName": "a",
+        },
+        Object {
+          "id": 3,
+          "typeName": "string",
+          "variableName": "b",
+        },
+        Object {
+          "children": Array [
+            Object {
+              "id": 5,
+              "typeName": "boolean",
+              "variableName": "boolean",
+            },
+          ],
+          "id": 4,
+          "typeName": "AliasOfBoolean",
+          "variableName": "c",
+        },
+      ],
+      "id": 6,
+      "typeName": "BarObject",
+      "variableName": "bar",
+    },
+  ],
+  "id": 7,
+  "typeName": "FooObject",
+  "variableName": undefined,
+}
+`;

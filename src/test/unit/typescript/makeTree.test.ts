@@ -1,6 +1,5 @@
 import * as path from 'path';
 import { Project, SourceFile } from 'ts-morph';
-import { TreeNode } from '../../../types';
 import { makeTree } from '../../../typescript/makeTree';
 
 let p: Project;
@@ -12,28 +11,12 @@ beforeEach(() => {
   });
   f = p.getSourceFile(path.resolve(__dirname, './fixtures/object-type.ts'))!;
 });
-it('should make tree', () => {
-  const result = makeTree(f, 27);
-  expect(result).toMatchObject({
-    variableName: 'foo',
-    typeName: 'number | number[]',
-  });
+it('should make tree from TypeAliasDeclaration', () => {
+  const result = makeTree(f, 13); // FooObject
+  expect(result).toMatchSnapshot();
 });
 
-it('should make nested tree', () => {
+it('should make tree from PropertySignature', () => {
   const result = makeTree(f, 52);
-  const expected = {
-    variableName: 'bar',
-    typeName: 'BarObject',
-    children: [
-      { variableName: 'a', typeName: 'number' },
-      { variableName: 'b', typeName: 'string' },
-      {
-        variableName: 'c',
-        typeName: 'AliasOfBoolean',
-        children: [{ variableName: 'boolean', typeName: 'boolean' }],
-      },
-    ],
-  };
-  expect(result).toMatchObject(expected);
+  expect(result).toMatchSnapshot();
 });
