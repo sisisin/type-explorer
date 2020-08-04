@@ -7,7 +7,7 @@ Explorer for TypeScript's Type Aliases/interfaces
 
 Display tree view of type alias/interface.
 
-![demo](https://github.com/sisisin/type-explorer/blob/master/assets/doc/demo.gif)
+![demo]()
 
 <!--
 ## Known Issues
