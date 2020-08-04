@@ -10,3 +10,8 @@ type BarObject = {
 };
 
 type AliasOfBoolean = boolean;
+
+type BazObject = {
+  baz: AliasOfString | string[];
+};
+type AliasOfString = string;

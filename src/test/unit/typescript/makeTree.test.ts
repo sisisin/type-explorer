@@ -26,3 +26,7 @@ it('should make tree from Alias to primitive Type', () => {
 it('should make tree from PropertySignature which references primitive Alias', () => {
   expect(makeTree(f, 122)).toMatchSnapshot();
 });
+
+it('should make tree from Union with TypeAlias', () => {
+  expect(makeTree(f, 198)).toMatchSnapshot();
+});

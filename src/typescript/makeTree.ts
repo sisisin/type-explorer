@@ -1,4 +1,12 @@
-import { Node, PropertySignature, SourceFile, ts, Type, TypeAliasDeclaration } from 'ts-morph';
+import {
+  Node,
+  PropertySignature,
+  SourceFile,
+  ts,
+  Type,
+  TypeAliasDeclaration,
+  TypeNode,
+} from 'ts-morph';
 import { TreeNode } from '../types';
 
 export function makeTree(src: SourceFile, pos: number) {
@@ -28,51 +36,84 @@ function makeTypeTree(genId: () => number, node: TreeableNode): TreeNode | undef
   if (typeNode === undefined) {
     return { id: genId(), ...getNames(node) };
   }
-  if (Node.isTypeReferenceNode(typeNode)) {
-    return fromTypeReferenceNode(genId, node);
-  } else if (Node.isUnionTypeNode(typeNode)) {
-    // todo
-    return { id: genId(), ...getNames(node) };
-  } else if (Node.isTypeAliasDeclaration(node)) {
+
+  if (Node.isTypeAliasDeclaration(node)) {
     const children: TreeNode[] = !Node.isTypeElementMemberedNode(typeNode)
       ? []
       : typeNode
           .getProperties()
           .map((p) => makeTypeTree(genId, p))
-          .filter(omitNilValue);
+          .filter(isNonNullable);
     return {
       id: genId(),
       variableName: undefined,
       typeName: node.getName(),
       children,
     };
+  }
+
+  if (Node.isTypeReferenceNode(typeNode)) {
+    return fromTypeReferenceNode(genId, getNames(node), typeNode);
+  } else if (Node.isUnionTypeNode(typeNode)) {
+    const children: TreeNode[] = typeNode
+      .getTypeNodes()
+      .map((tn) => {
+        const base: Pick<TreeNode, 'typeName' | 'variableName'> = {
+          variableName: undefined,
+          typeName: tn.getText(),
+        };
+        return fromTypeReferenceNode(genId, base, tn);
+      })
+      .filter(isNonNullable);
+    return { id: genId(), ...getNames(node), children };
   } else {
     return { id: genId(), ...getNames(node) };
   }
 }
-function getNames(node: TreeableNode): Omit<TreeNode, 'id'> {
-  const variableName = node.getName();
-  const typeNode = node.getTypeNode();
-  const typeName = typeNode?.getText() ?? node.getType().getText();
-  return { variableName, typeName };
+function getNames(
+  node: TreeableNode | undefined,
+  typeNode = node?.getTypeNode(),
+): Omit<TreeNode, 'id'> {
+  return {
+    variableName: node?.getName(),
+    typeName:
+      typeNode?.getText() ??
+      node?.getType().getText() ??
+      (() => {
+        throw new Error(
+          'Invalid arguments. `node` or `typeNode` must not be undefined at least one',
+        );
+      })(),
+  };
 }
-function fromTypeReferenceNode(genId: () => number, node: TreeableNode) {
-  const type = node.getType();
-  const base = getNames(node);
+function fromTypeReferenceNode(
+  genId: () => number,
+  names: Pick<TreeNode, 'typeName' | 'variableName'>,
+  typeNode: TypeNode<ts.TypeNode>,
+) {
+  const type = typeNode.getType();
+  const base = names;
 
-  // Case of {node: Foo} and type Foo = [primitive type]
-  if (isPrimitiveType(type)) {
-    return {
-      id: genId(),
-      ...base,
-      children: [
-        {
-          id: genId(),
-          variableName: type.getText(),
-          typeName: type.getText(),
-        },
-      ],
-    };
+  // Case of {node: Foo} and type Foo is a primitive-like
+  if (isNotTreeableType(type)) {
+    if (Node.isTypeReferenceNode(typeNode)) {
+      return {
+        id: genId(),
+        ...base,
+        children: [
+          {
+            id: genId(),
+            variableName: undefined,
+            typeName: type.getText(),
+          },
+        ],
+      };
+    } else {
+      return {
+        id: genId(),
+        ...base,
+      };
+    }
   }
   const props = type.getProperties();
   const children: TreeNode[] = props
@@ -88,27 +129,31 @@ function fromTypeReferenceNode(genId: () => number, node: TreeableNode) {
         };
       }
     })
-    .filter(omitNilValue);
+    .filter(isNonNullable);
   return {
     id: genId(),
     ...base,
     children,
   };
 }
-function omitNilValue<T extends unknown>(v: T): v is NonNullable<typeof v> {
-  return v !== undefined;
+function isNonNullable<T extends unknown>(v: T): v is NonNullable<T> {
+  return v != null;
 }
-function isPrimitiveType(type: Type<ts.Type> | undefined) {
-  if (type === undefined) return false;
-  return (
-    type.isAny() ||
-    type.isBoolean() ||
-    type.isBooleanLiteral() ||
-    type.isLiteral() ||
-    type.isNull() ||
-    type.isNumber() ||
-    type.isString() ||
-    type.isStringLiteral() ||
-    type.isUnknown()
-  );
+function isNotTreeableType(type: Type<ts.Type> | undefined): boolean {
+  return type?.isArray() ? isNotTreeableType(type.getArrayElementType()) : isPrimitiveType(type);
+
+  function isPrimitiveType(type: Type<ts.Type> | undefined) {
+    if (type === undefined) return false;
+    return (
+      type.isAny() ||
+      type.isBoolean() ||
+      type.isBooleanLiteral() ||
+      type.isLiteral() ||
+      type.isNull() ||
+      type.isNumber() ||
+      type.isString() ||
+      type.isStringLiteral() ||
+      type.isUnknown()
+    );
+  }
 }
