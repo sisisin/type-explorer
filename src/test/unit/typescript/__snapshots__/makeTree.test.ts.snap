@@ -41,6 +41,21 @@ Object {
 }
 `;
 
+exports[`should make tree from PropertySignature which references primitive Alias 1`] = `
+Object {
+  "children": Array [
+    Object {
+      "id": 2,
+      "typeName": "boolean",
+      "variableName": "boolean",
+    },
+  ],
+  "id": 1,
+  "typeName": "AliasOfBoolean",
+  "variableName": "c",
+}
+`;
+
 exports[`should make tree from TypeAliasDeclaration 1`] = `
 Object {
   "children": Array [
