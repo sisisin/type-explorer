@@ -2,8 +2,14 @@
 
 exports[`should make tree from Alias to primitive Type 1`] = `
 Object {
-  "children": Array [],
-  "id": 1,
+  "children": Array [
+    Object {
+      "id": 1,
+      "typeName": "boolean",
+      "variableName": undefined,
+    },
+  ],
+  "id": 2,
   "typeName": "AliasOfBoolean",
   "variableName": undefined,
 }

@@ -38,18 +38,7 @@ function makeTypeTree(genId: () => number, node: TreeableNode): TreeNode | undef
   }
 
   if (Node.isTypeAliasDeclaration(node)) {
-    const children: TreeNode[] = !Node.isTypeElementMemberedNode(typeNode)
-      ? []
-      : typeNode
-          .getProperties()
-          .map((p) => makeTypeTree(genId, p))
-          .filter(isNonNullable);
-    return {
-      id: genId(),
-      variableName: undefined,
-      typeName: node.getName(),
-      children,
-    };
+    return fromTypeAliasDeclaration(genId, node, typeNode);
   }
 
   if (Node.isTypeReferenceNode(typeNode)) {
@@ -69,6 +58,33 @@ function makeTypeTree(genId: () => number, node: TreeableNode): TreeNode | undef
   } else {
     return { id: genId(), ...getNames(node) };
   }
+}
+function fromTypeAliasDeclaration(
+  genId: () => number,
+  node: TypeAliasDeclaration,
+  typeNode: TypeNode<ts.TypeNode>,
+) {
+  let children: TreeNode[];
+  if (Node.isTypeElementMemberedNode(typeNode)) {
+    children = typeNode
+      .getProperties()
+      .map((p) => makeTypeTree(genId, p))
+      .filter(isNonNullable);
+  } else {
+    children = [
+      {
+        id: genId(),
+        variableName: undefined,
+        typeName: node.getType().getText(),
+      },
+    ];
+  }
+  return {
+    id: genId(),
+    variableName: undefined,
+    typeName: node.getName(),
+    children,
+  };
 }
 function getNames(
   node: TreeableNode | undefined,
