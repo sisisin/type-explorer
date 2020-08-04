@@ -1,16 +1,21 @@
 # type-explorer README
 
+Explorer for TypeScript's Type Aliases/interfaces
+\*This is alpha release
+
 ## Features
 
-TypeScript type alias explorer.
+Display tree view of type alias/interface.
 
+![demo](https://raw.githubusercontent.com/sisisin/type-explorer/master/assets/doc/demo.gif)
+
+<!--
 ## Known Issues
+-->
 
-- Only support for `property signature`
+## License
 
-## Release Notes
-
-tbd
+MIT
 
 ## Credits
 

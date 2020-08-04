@@ -1,15 +1,30 @@
 {
   "name": "type-explorer",
-  "displayName": "type-explorer",
-  "description": "",
-  "license": "MIT",
   "version": "0.0.1",
+  "publisher": "sisisin",
   "engines": {
     "vscode": "^1.47.0"
   },
+  "license": "MIT",
+  "displayName": "type-explorer",
+  "description": "Explorer for TypeScript's Type Aliases/interfaces",
   "categories": [
-    "Other"
+    "Programming Languages"
   ],
+  "keywords": [
+    "typescript",
+    "type alias",
+    "interface",
+    "tree view"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/sisisin/type-explorer.git"
+  },
+  "bugs": {
+    "url": "https://github.com/sisisin/type-explorer/issues"
+  },
+  "homepage": "https://github.com/sisisin/type-explorer#readme",
   "activationEvents": [
     "onLanguage:typescript",
     "onLanguage:typescriptreact",
