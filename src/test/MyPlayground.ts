@@ -8,7 +8,14 @@ async function main() {
     tsConfigFilePath: path.resolve(testProjectPath, 'tsconfig.json'),
   });
   const f = p.getSourceFile(path.resolve(testProjectPath, 'object-type.ts'))!;
-  const tree = makeTree(f, 16);
+
+  let pos: number;
+  pos = 19;
+  pos = 122; // c: AliasOfBoolean
+  pos = 153;
+  pos = 198; // baz: AliasOfString | string[];
+
+  const tree = makeTree(f, pos);
   console.log(JSON.stringify(tree, null, '  '));
 }
 

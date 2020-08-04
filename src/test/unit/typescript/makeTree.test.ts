@@ -12,15 +12,21 @@ beforeEach(() => {
   f = p.getSourceFile(path.resolve(__dirname, './fixtures/object-type.ts'))!;
 });
 it('should make tree from TypeAliasDeclaration', () => {
-  const result = makeTree(f, 13); // FooObject
-  expect(result).toMatchSnapshot();
+  expect(makeTree(f, 13)).toMatchSnapshot();
 });
 
 it('should make tree from PropertySignature', () => {
-  const result = makeTree(f, 52);
-  expect(result).toMatchSnapshot();
+  expect(makeTree(f, 52)).toMatchSnapshot();
 });
 
 it('should make tree from Alias to primitive Type', () => {
   expect(makeTree(f, 164)).toMatchSnapshot();
+});
+
+it('should make tree from PropertySignature which references primitive Alias', () => {
+  expect(makeTree(f, 122)).toMatchSnapshot();
+});
+
+it('should make tree from Union with TypeAlias', () => {
+  expect(makeTree(f, 198)).toMatchSnapshot();
 });

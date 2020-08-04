@@ -2,8 +2,14 @@
 
 exports[`should make tree from Alias to primitive Type 1`] = `
 Object {
-  "children": Array [],
-  "id": 1,
+  "children": Array [
+    Object {
+      "id": 1,
+      "typeName": "boolean",
+      "variableName": undefined,
+    },
+  ],
+  "id": 2,
   "typeName": "AliasOfBoolean",
   "variableName": undefined,
 }
@@ -27,7 +33,7 @@ Object {
         Object {
           "id": 4,
           "typeName": "boolean",
-          "variableName": "boolean",
+          "variableName": undefined,
         },
       ],
       "id": 3,
@@ -41,46 +47,100 @@ Object {
 }
 `;
 
+exports[`should make tree from PropertySignature which references primitive Alias 1`] = `
+Object {
+  "children": Array [
+    Object {
+      "id": 2,
+      "typeName": "boolean",
+      "variableName": undefined,
+    },
+  ],
+  "id": 1,
+  "typeName": "AliasOfBoolean",
+  "variableName": "c",
+}
+`;
+
 exports[`should make tree from TypeAliasDeclaration 1`] = `
 Object {
   "children": Array [
     Object {
-      "id": 1,
+      "children": Array [
+        Object {
+          "id": 1,
+          "typeName": "number",
+          "variableName": undefined,
+        },
+        Object {
+          "id": 2,
+          "typeName": "number[]",
+          "variableName": undefined,
+        },
+      ],
+      "id": 3,
       "typeName": "number | number[]",
       "variableName": "foo",
     },
     Object {
       "children": Array [
         Object {
-          "id": 2,
+          "id": 4,
           "typeName": "number",
           "variableName": "a",
         },
         Object {
-          "id": 3,
+          "id": 5,
           "typeName": "string",
           "variableName": "b",
         },
         Object {
           "children": Array [
             Object {
-              "id": 5,
+              "id": 7,
               "typeName": "boolean",
-              "variableName": "boolean",
+              "variableName": undefined,
             },
           ],
-          "id": 4,
+          "id": 6,
           "typeName": "AliasOfBoolean",
           "variableName": "c",
         },
       ],
-      "id": 6,
+      "id": 8,
       "typeName": "BarObject",
       "variableName": "bar",
     },
   ],
-  "id": 7,
+  "id": 9,
   "typeName": "FooObject",
   "variableName": undefined,
+}
+`;
+
+exports[`should make tree from Union with TypeAlias 1`] = `
+Object {
+  "children": Array [
+    Object {
+      "children": Array [
+        Object {
+          "id": 2,
+          "typeName": "string",
+          "variableName": undefined,
+        },
+      ],
+      "id": 1,
+      "typeName": "AliasOfString",
+      "variableName": undefined,
+    },
+    Object {
+      "id": 3,
+      "typeName": "string[]",
+      "variableName": undefined,
+    },
+  ],
+  "id": 4,
+  "typeName": "AliasOfString | string[]",
+  "variableName": "baz",
 }
 `;
