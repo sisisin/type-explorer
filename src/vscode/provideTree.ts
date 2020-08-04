@@ -14,7 +14,8 @@ export async function provideTree(context: vscode.ExtensionContext, editor: vsco
   const pos = await getPos(targetFile, editor.selection.active);
 
   const typeTree = makeTree(f, pos);
-  const provider = new TypeExplorerProvider(typeTree!);
+  if (typeTree === undefined) return;
+  const provider = new TypeExplorerProvider(typeTree);
   const treeDataDisposable = vscode.window.registerTreeDataProvider('typeExplorer', provider);
   context.subscriptions.push(treeDataDisposable);
   const treeViewDisposable = vscode.window.createTreeView('typeExplorerView', {
