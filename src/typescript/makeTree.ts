@@ -8,6 +8,7 @@ import {
   TypeNode,
 } from 'ts-morph';
 import { TreeNode } from '../types';
+import { isNonNullable } from '../utils';
 
 export function makeTree(src: SourceFile, pos: number) {
   const child = src.getFirstChild()?.getDescendantAtPos(pos);
@@ -151,9 +152,6 @@ function fromTypeReferenceNode(
     ...base,
     children,
   };
-}
-function isNonNullable<T extends unknown>(v: T): v is NonNullable<T> {
-  return v != null;
 }
 function isNotTreeableType(type: Type<ts.Type> | undefined): boolean {
   return type?.isArray() ? isNotTreeableType(type.getArrayElementType()) : isPrimitiveType(type);
