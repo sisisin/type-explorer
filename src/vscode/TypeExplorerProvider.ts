@@ -12,14 +12,22 @@ function find(id: string, target: TreeNode[]): TreeNode | undefined {
   return undefined;
 }
 export class TypeExplorerProvider implements vscode.TreeDataProvider<Type> {
-  constructor(private treeNode: TreeNode) {
+  constructor(private treeNode: TreeNode | undefined) {
     // this.treeNode = treeObj;
   }
-  // onDidChangeTreeData?: vscode.Event<void | Type | null | undefined> | undefined;
+  _onDidChangeTreeData = new vscode.EventEmitter<Type | undefined>();
+  onDidChangeTreeData = this._onDidChangeTreeData.event;
+  refresh(treeNode: TreeNode | undefined) {
+    this.treeNode = treeNode;
+    this._onDidChangeTreeData.fire(undefined);
+  }
   getTreeItem(element: Type): vscode.TreeItem | Thenable<vscode.TreeItem> {
     return element;
   }
   getChildren(element?: Type | undefined): vscode.ProviderResult<Type[]> {
+    if (this.treeNode === undefined) {
+      return;
+    }
     if (element === undefined) {
       return [new Type(this.treeNode, vscode.TreeItemCollapsibleState.Collapsed)];
     }
