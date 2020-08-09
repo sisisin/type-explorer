@@ -9,19 +9,18 @@ import {
 } from 'ts-morph';
 import { TreeNode } from '../types';
 import { isNonNullable } from '../utils';
+function getIdGenerator() {
+  let id = 0;
+  return () => ++id;
+}
 
 export function makeTree(src: SourceFile, pos: number) {
-  const child = src.getFirstChild()?.getDescendantAtPos(pos);
-  const propertySignature = child?.getParent()!;
-  if (!isTreeableNode(propertySignature)) {
-    console.log('invalid type: ', child?.getType().getText());
+  const node = src.getDescendantAtPos(pos)?.getParent();
+  if (!isTreeableNode(node)) {
+    console.log('invalid type: ', node?.getType().getText());
     return;
   }
-  const genId = (() => {
-    let id = 0;
-    return () => ++id;
-  })();
-  return makeTypeTree(genId, propertySignature);
+  return makeTypeTree(getIdGenerator(), node);
 }
 
 function isTreeableNode(node: Node<ts.Node> | undefined): node is TreeableNode {
