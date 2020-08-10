@@ -1,6 +1,7 @@
 import * as ts from 'typescript';
 import { makeTree } from '../../../typescript/makeTree2';
 import { createProgram, getArgPart } from './helpers';
+import { TreeNode } from '../../../types';
 
 let p: ts.Program;
 
@@ -42,5 +43,85 @@ describe('primitive typed TypeAliasDeclaration', () => {
       const { f, pos } = getArgPart(p, 'aliased-primitives.ts', identifier);
       expect(makeTree(p, f, pos)).toMatchObject(tree);
     });
+  });
+});
+
+describe('Literal Object typed TypeAliasDeclaration', () => {
+  it(`should make tree from PropertySignature`, () => {
+    const tree: TreeNode = {
+      id: expect.any(Number),
+      typeName: 'string',
+      variableName: 'foo',
+    };
+    const { f, pos } = getArgPart(p, 'property-signature.ts', 'foo');
+    expect(makeTree(p, f, pos)).toMatchObject(tree);
+  });
+
+  it('should make tree from TypeAlias', () => {
+    const tree: TreeNode = {
+      id: expect.any(Number),
+      typeName: 'FooObject',
+      variableName: undefined,
+      children: [
+        {
+          id: expect.any(Number),
+          typeName: 'string',
+          variableName: 'foo',
+        },
+        {
+          id: expect.any(Number),
+          typeName: 'AliasOfSomething',
+          variableName: 'bar',
+          children: [
+            {
+              id: expect.any(Number),
+              typeName: 'AliasOfSomething',
+              variableName: undefined,
+              children: [
+                {
+                  id: expect.any(Number),
+                  typeName: 'symbol',
+                  variableName: undefined,
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    };
+    const { f, pos } = getArgPart(p, 'property-signature.ts', 'FooObject');
+    expect(makeTree(p, f, pos)).toMatchObject(tree);
+  });
+});
+
+describe('Union typed TypeAliasDeclaration', () => {
+  it('should make tree', () => {
+    const tree: TreeNode = {
+      id: expect.any(Number),
+      typeName: 'U',
+      variableName: undefined,
+      children: [
+        {
+          id: expect.any(Number),
+          typeName: 'Alias',
+          variableName: undefined,
+          children: [
+            {
+              id: expect.any(Number),
+              typeName: 'string',
+              variableName: undefined,
+            },
+          ],
+        },
+        {
+          id: expect.any(Number),
+          typeName: 'number',
+          variableName: undefined,
+        },
+      ],
+    };
+    const { f, pos } = getArgPart(p, 'union.ts', 'U');
+    const actual = makeTree(p, f, pos);
+    expect(actual).toMatchObject(tree);
   });
 });

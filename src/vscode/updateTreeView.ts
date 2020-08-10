@@ -1,7 +1,7 @@
 import { Project } from 'ts-morph';
 import * as vscode from 'vscode';
 import { getPos } from '../file-utils/getPos';
-import { makeTree } from '../typescript/makeTree';
+import { makeTree } from '../typescript/makeTree2';
 import { TypeExplorerProvider } from './TypeExplorerProvider';
 
 export async function updateTreeView(
@@ -17,10 +17,12 @@ export async function updateTreeView(
   }
   const targetFile = editor.document.uri.fsPath;
 
-  const p = projects.find(({ workspaceFolder }) => targetFile.startsWith(workspaceFolder))?.project;
-  if (p === undefined) return;
+  const project = projects.find(({ workspaceFolder }) => targetFile.startsWith(workspaceFolder))
+    ?.project;
+  if (project === undefined) return;
+  const p = project.getProgram().compilerObject;
   const f = p.getSourceFile(targetFile)!;
   const pos = await getPos(targetFile, editor.selection.active);
 
-  provider.refresh(makeTree(f, pos));
+  provider.refresh(makeTree(p, f, pos));
 }
