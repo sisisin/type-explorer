@@ -23,6 +23,7 @@ export async function updateTreeView(
   const p = project.getProgram().compilerObject;
   const f = p.getSourceFile(targetFile)!;
   const pos = await getPos(targetFile, editor.selection.active);
+  const tree = makeTree(p, f, pos);
 
-  provider.refresh(makeTree(p, f, pos));
+  provider.refresh(tree);
 }

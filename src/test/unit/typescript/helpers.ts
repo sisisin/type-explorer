@@ -1,5 +1,6 @@
 import * as path from 'path';
 import * as ts from 'typescript';
+import { TreeNode, TreeNodeLike } from '../../../types';
 
 export const fixtureProject = path.resolve(__dirname, 'fixtures');
 
@@ -17,6 +18,17 @@ export function getArgPart(p: ts.Program, target: string, identifier?: string) {
     f,
     pos: identifier === undefined ? undefined : f.getText().indexOf(identifier),
   };
+}
+
+export function dropId(target: TreeNode | undefined): TreeNodeLike | undefined {
+  if (target === undefined) return undefined;
+  return drop(target);
+
+  function drop(target: TreeNode): TreeNodeLike | undefined {
+    delete target.id;
+    if (target.children) target.children.forEach((child) => drop(child));
+    return target;
+  }
 }
 
 export function createConfigFileHost(): ts.ParseConfigFileHost {
