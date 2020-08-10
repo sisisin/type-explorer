@@ -38,6 +38,13 @@ function makeTypeTree(ctx: Context, node: ts.Node): TreeNode | undefined {
     return fromPropertySignature(ctx, node);
   } else if (ts.isTypeReferenceNode(node)) {
     return fromTypeReferenceNode(ctx, node);
+  } else if (ts.isArrayTypeNode(node)) {
+    const { genId } = ctx;
+    return withChildren(ctx, node, {
+      id: genId(),
+      typeName: node.getText(),
+      variableName: undefined,
+    });
   }
 
   return undefined;
@@ -56,7 +63,11 @@ function fromPropertySignature(ctx: Context, node: ts.PropertySignature) {
   const { genId } = ctx;
   const typeName = node.type?.getText() ?? assert('TypeNode must not be undefined');
 
-  return withChildren(ctx, node, { id: genId(), typeName, variableName: node.name.getText() });
+  return withChildren(ctx, node, {
+    id: genId(),
+    typeName,
+    variableName: node.name.getText(),
+  });
 }
 
 function assert(msg: string): string {
@@ -97,9 +108,9 @@ function withChildren(
     return base;
   }
 }
-type ChildrenNode = ts.TypeAliasDeclaration | ts.PropertySignature;
+type ChildrenNode = ts.TypeAliasDeclaration | ts.PropertySignature | ts.ArrayTypeNode;
 function makeChildren(ctx: Context, node: ChildrenNode): TreeNode[] {
-  const declarationBody = findDeclarationBody(node);
+  const declarationBody = findDeclarationNode(node);
   if (declarationBody === undefined) return [];
   if (isPrimitiveKeyword(declarationBody)) {
     return [makeTypeTree(ctx, declarationBody)].filter(isNonNullable);
@@ -109,10 +120,13 @@ function makeChildren(ctx: Context, node: ChildrenNode): TreeNode[] {
     return [makeTypeTree(ctx, declarationBody)].filter(isNonNullable);
   } else if (ts.isUnionTypeNode(declarationBody)) {
     const syntaxList = declarationBody.getChildren()[0];
-
-    return findDeclarationNodes(syntaxList)
-      .map((body) => makeTypeTree(ctx, body))
-      .filter(isNonNullable);
+    if (syntaxList.kind === ts.SyntaxKind.SyntaxList) {
+      return findDeclarationNodes(syntaxList as ts.SyntaxList)
+        .map((body) => makeTypeTree(ctx, body))
+        .filter(isNonNullable);
+    }
+  } else if (ts.isArrayTypeNode(declarationBody)) {
+    return [makeTypeTree(ctx, declarationBody)].filter(isNonNullable);
   }
   return [];
 }
@@ -152,24 +166,31 @@ function findTreeNodeStartingPoint(node: ts.Node): TreeNodeStartingPoint | undef
   return findTreeNodeStartingPoint(node.parent);
 }
 
-function findDeclarationBody(node: ts.Node): ts.Node | undefined {
-  return node.getChildren().find((child) => {
-    return (
-      isPrimitiveKeyword(child) ||
-      ts.isTypeLiteralNode(child) ||
-      ts.isTypeReferenceNode(child) ||
-      ts.isUnionTypeNode(child)
-    );
-  });
+function isTypeDefinitionNode(node: ts.Node) {
+  return (
+    isPrimitiveKeyword(node) ||
+    ts.isTypeLiteralNode(node) ||
+    ts.isTypeReferenceNode(node) ||
+    ts.isUnionTypeNode(node) ||
+    ts.isArrayTypeNode(node)
+  );
 }
 
-function findDeclarationNodes(node: ts.Node): ts.Node[] {
-  return node.getChildren().filter((child) => {
-    return (
-      isPrimitiveKeyword(child) ||
-      ts.isTypeLiteralNode(child) ||
-      ts.isTypeReferenceNode(child) ||
-      ts.isUnionTypeNode(child)
-    );
-  });
+type HasOneDeclarationAmongChildren =
+  | ts.TypeAliasDeclaration
+  | ts.PropertySignature
+  | ts.ArrayTypeNode;
+/**
+ * Find type definition node among children nodes
+ * @example
+ * type Foo = { foo: Bar }  // => returned `{ foo: Bar }`
+ * @param node A type definition node
+ */
+function findDeclarationNode(node: HasOneDeclarationAmongChildren): ts.Node | undefined {
+  return node.getChildren().find(isTypeDefinitionNode);
+}
+
+type HasMultiDeclarationAmongChildren = HasOneDeclarationAmongChildren | ts.SyntaxList;
+function findDeclarationNodes(node: HasMultiDeclarationAmongChildren): ts.Node[] {
+  return node.getChildren().filter(isTypeDefinitionNode);
 }

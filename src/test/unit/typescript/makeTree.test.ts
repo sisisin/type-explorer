@@ -111,7 +111,7 @@ describe('Literal Object typed TypeAliasDeclaration', () => {
 });
 
 describe('Union typed TypeAliasDeclaration', () => {
-  it('should make tree', () => {
+  it('should make tree which has Union Attributes', () => {
     const tree: TreeNodeLike = {
       typeName: 'U',
       variableName: undefined,
@@ -133,6 +133,30 @@ describe('Union typed TypeAliasDeclaration', () => {
       ],
     };
     const { f, pos } = getArgPart(p, 'union.ts', 'U');
+    const actual = makeTree(p, f, pos);
+    expect(dropId(actual)).toStrictEqual(tree);
+  });
+});
+describe('Array typed TypeAliasDeclaration', () => {
+  it('should make tree which has Array type', () => {
+    const tree: TreeNodeLike = {
+      typeName: 'AliasOfArray',
+      variableName: undefined,
+      children: [
+        {
+          typeName: 'AliasOfBoolean[]',
+          variableName: undefined,
+          children: [
+            {
+              typeName: 'AliasOfBoolean',
+              variableName: undefined,
+              children: [{ typeName: 'boolean', variableName: undefined }],
+            },
+          ],
+        },
+      ],
+    };
+    const { f, pos } = getArgPart(p, 'aliased-array.ts', 'AliasOfArray');
     const actual = makeTree(p, f, pos);
     expect(dropId(actual)).toStrictEqual(tree);
   });
