@@ -5,6 +5,7 @@ import {
   isPrimitiveKeyword,
   findDeclarationNodes,
   findDeclarationNode,
+  isSyntaxList,
 } from './util';
 import { isNonNullable, assert, getIdGenerator } from '../utils';
 
@@ -22,6 +23,21 @@ export function makeTree(program: ts.Program, src: ts.SourceFile, pos: number) {
   }
 
   return from({ checker, genId: getIdGenerator() }, treeNodeStartingPoint);
+
+  type TreeNodeStartingPoint = ts.PropertySignature | ts.TypeAliasDeclaration;
+  function isTreeNodeStartingPoint(node: ts.Node): node is TreeNodeStartingPoint {
+    return (
+      ts.isPropertySignature(node) ||
+      ts.isTypeAliasDeclaration(node) ||
+      ts.isInterfaceDeclaration(node)
+    );
+  }
+  function findTreeNodeStartingPoint(node: ts.Node): TreeNodeStartingPoint | undefined {
+    if (ts.isSourceFile(node)) return undefined;
+    else if (isTreeNodeStartingPoint(node)) return node;
+
+    return findTreeNodeStartingPoint(node.parent);
+  }
 }
 
 export interface Context {
@@ -61,6 +77,13 @@ function from(ctx: Context, node: ts.Node): TreeNode | undefined {
       variableName: undefined,
       ...makeChildren(ctx, node),
     };
+  } else if (ts.isInterfaceDeclaration(node)) {
+    return {
+      id: genId(),
+      typeName: node.name.getText(),
+      variableName: undefined,
+      ...makeChildren(ctx, node),
+    };
   }
 
   return undefined;
@@ -76,42 +99,38 @@ function fromTypeReferenceNode(ctx: Context, node: ts.TypeReferenceNode) {
   return from(ctx, declNode);
 }
 
-type ChildrenNode = ts.TypeAliasDeclaration | ts.PropertySignature | ts.ArrayTypeNode;
+type ChildrenNode =
+  | ts.TypeAliasDeclaration
+  | ts.PropertySignature
+  | ts.ArrayTypeNode
+  | ts.InterfaceDeclaration;
 function makeChildren(ctx: Context, node: ChildrenNode): Pick<TreeNode, 'children'> {
   const children = makeChildrenList(ctx, node);
   return children.length > 0 ? { children } : {};
+}
 
-  function makeChildrenList(ctx: Context, node: ChildrenNode): TreeNode[] {
-    const declarationBody = findDeclarationNode(node);
-    if (declarationBody === undefined) return [];
-    if (isPrimitiveKeyword(declarationBody)) {
-      return [from(ctx, declarationBody)].filter(isNonNullable);
-    } else if (ts.isTypeLiteralNode(declarationBody)) {
-      return declarationBody.members.map((m) => from(ctx, m)).filter(isNonNullable);
-    } else if (ts.isTypeReferenceNode(declarationBody)) {
-      return [from(ctx, declarationBody)].filter(isNonNullable);
-    } else if (ts.isUnionTypeNode(declarationBody)) {
-      const syntaxList = declarationBody.getChildren()[0];
-      if (syntaxList.kind === ts.SyntaxKind.SyntaxList) {
-        return findDeclarationNodes(syntaxList as ts.SyntaxList)
-          .map((body) => from(ctx, body))
-          .filter(isNonNullable);
-      }
-    } else if (ts.isArrayTypeNode(declarationBody)) {
-      return [from(ctx, declarationBody)].filter(isNonNullable);
+function makeChildrenList(ctx: Context, node: ChildrenNode): TreeNode[] {
+  const declarationBody = findDeclarationNode(node);
+  if (declarationBody === undefined) return [];
+  if (isPrimitiveKeyword(declarationBody)) {
+    return [from(ctx, declarationBody)].filter(isNonNullable);
+  } else if (ts.isTypeLiteralNode(declarationBody)) {
+    return declarationBody.members.map((m) => from(ctx, m)).filter(isNonNullable);
+  } else if (ts.isTypeReferenceNode(declarationBody)) {
+    return [from(ctx, declarationBody)].filter(isNonNullable);
+  } else if (ts.isUnionTypeNode(declarationBody)) {
+    const syntaxList = declarationBody.getChildren()[0];
+    if (isSyntaxList(syntaxList)) {
+      return findDeclarationNodes(syntaxList)
+        .map((body) => from(ctx, body))
+        .filter(isNonNullable);
     }
-    return [];
+  } else if (ts.isArrayTypeNode(declarationBody)) {
+    return [from(ctx, declarationBody)].filter(isNonNullable);
+  } else if (isSyntaxList(declarationBody)) {
+    return findDeclarationNodes(declarationBody)
+      .map((body) => from(ctx, body))
+      .filter(isNonNullable);
   }
-}
-
-function isTreeNodeStartingPoint(node: ts.Node): node is TreeNodeStartingPoint {
-  return ts.isPropertySignature(node) || ts.isTypeAliasDeclaration(node);
-}
-type TreeNodeStartingPoint = ts.PropertySignature | ts.TypeAliasDeclaration;
-
-function findTreeNodeStartingPoint(node: ts.Node): TreeNodeStartingPoint | undefined {
-  if (ts.isSourceFile(node)) return undefined;
-  else if (isTreeNodeStartingPoint(node)) return node;
-
-  return findTreeNodeStartingPoint(node.parent);
+  return [];
 }

@@ -161,3 +161,27 @@ describe('Array typed TypeAliasDeclaration', () => {
     expect(dropId(actual)).toStrictEqual(tree);
   });
 });
+
+describe('InterfaceDeclaration', () => {
+  const tree: TreeNodeLike = {
+    typeName: 'FooInterface',
+    variableName: undefined,
+    children: [
+      {
+        typeName: 'string',
+        variableName: 'foo',
+        children: [
+          {
+            typeName: 'string',
+            variableName: undefined,
+          },
+        ],
+      },
+    ],
+  };
+  it('should make tree from basic interface', () => {
+    const { f, pos } = getArgPart(p, 'interface.ts', 'FooInterface');
+    const actual = makeTree(p, f, pos);
+    expect(dropId(actual)).toStrictEqual(tree);
+  });
+});

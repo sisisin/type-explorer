@@ -53,14 +53,21 @@ function isTypeDefinitionNode(node: ts.Node) {
     ts.isTypeLiteralNode(node) ||
     ts.isTypeReferenceNode(node) ||
     ts.isUnionTypeNode(node) ||
-    ts.isArrayTypeNode(node)
+    ts.isArrayTypeNode(node) ||
+    isSyntaxList(node) ||
+    ts.isPropertySignature(node)
   );
+}
+
+export function isSyntaxList(node: ts.Node): node is ts.SyntaxList {
+  return node.kind === ts.SyntaxKind.SyntaxList;
 }
 
 type HasOneDeclarationAmongChildren =
   | ts.TypeAliasDeclaration
   | ts.PropertySignature
-  | ts.ArrayTypeNode;
+  | ts.ArrayTypeNode
+  | ts.InterfaceDeclaration;
 /**
  * Find type definition node among children nodes
  * @example

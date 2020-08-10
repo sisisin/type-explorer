@@ -24,10 +24,15 @@ export function dropId(target: TreeNode | undefined): TreeNodeLike | undefined {
   if (target === undefined) return undefined;
   return drop(target);
 
-  function drop(target: TreeNode): TreeNodeLike | undefined {
-    delete target.id;
-    if (target.children) target.children.forEach((child) => drop(child));
-    return target;
+  function drop(t: TreeNode): TreeNodeLike | undefined {
+    if (t.id === undefined) {
+      throw new Error(
+        `Invalid TreeNode. TreeNode must have 'id' property. typeName: ${t.typeName}`,
+      );
+    }
+    delete t.id;
+    if (t.children) t.children.forEach((child) => drop(child));
+    return t;
   }
 }
 
