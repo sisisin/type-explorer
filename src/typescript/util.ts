@@ -23,3 +23,55 @@ export function getChildAtPos(node: ts.Node, pos: number) {
   }
   return undefined;
 }
+
+export function isPrimitiveKeyword(node: ts.Node) {
+  switch (node.kind) {
+    case ts.SyntaxKind.BooleanKeyword:
+    case ts.SyntaxKind.StringKeyword:
+    case ts.SyntaxKind.NumberKeyword:
+    case ts.SyntaxKind.SymbolKeyword:
+    case ts.SyntaxKind.NullKeyword:
+    case ts.SyntaxKind.UndefinedKeyword:
+    case ts.SyntaxKind.AnyKeyword:
+    case ts.SyntaxKind.UnknownKeyword:
+    case ts.SyntaxKind.BigIntKeyword:
+    case ts.SyntaxKind.ObjectKeyword:
+    case ts.SyntaxKind.ThisKeyword:
+    case ts.SyntaxKind.VoidKeyword:
+    case ts.SyntaxKind.NeverKeyword:
+    case ts.SyntaxKind.LiteralType:
+      return true;
+
+    default:
+      return false;
+  }
+}
+
+function isTypeDefinitionNode(node: ts.Node) {
+  return (
+    isPrimitiveKeyword(node) ||
+    ts.isTypeLiteralNode(node) ||
+    ts.isTypeReferenceNode(node) ||
+    ts.isUnionTypeNode(node) ||
+    ts.isArrayTypeNode(node)
+  );
+}
+
+type HasOneDeclarationAmongChildren =
+  | ts.TypeAliasDeclaration
+  | ts.PropertySignature
+  | ts.ArrayTypeNode;
+/**
+ * Find type definition node among children nodes
+ * @example
+ * type Foo = { foo: Bar }  // => returned `{ foo: Bar }`
+ * @param node A type definition node
+ */
+export function findDeclarationNode(node: HasOneDeclarationAmongChildren): ts.Node | undefined {
+  return node.getChildren().find(isTypeDefinitionNode);
+}
+
+type HasMultiDeclarationAmongChildren = HasOneDeclarationAmongChildren | ts.SyntaxList;
+export function findDeclarationNodes(node: HasMultiDeclarationAmongChildren): ts.Node[] {
+  return node.getChildren().filter(isTypeDefinitionNode);
+}
