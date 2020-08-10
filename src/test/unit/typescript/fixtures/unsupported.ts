@@ -1,0 +1,1 @@
+namespace Unsupported__Namespace {}

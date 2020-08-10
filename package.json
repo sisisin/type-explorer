@@ -63,7 +63,25 @@
         }
       ]
     },
-    "commands": []
+    "menus": {
+      "view/title": [
+        {
+          "command": "typeExplorerView.refreshTypeScriptProject",
+          "when": "view == typeExplorerView || view == typeExplorer",
+          "group": "navigation"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "typeExplorerView.refreshTypeScriptProject",
+        "title": "Refresh TypeScript Project",
+        "icon": {
+          "dark": "assets/vscode-icons/dark/sync.svg",
+          "light": "assets/vscode-icons/light/sync.svg"
+        }
+      }
+    ]
   },
   "scripts": {
     "vscode:prepublish": "yarn run compile",
