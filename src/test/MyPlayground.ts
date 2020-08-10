@@ -1,6 +1,6 @@
-import { Project, SourceFile, ts, Type, PropertySignature, Node } from 'ts-morph';
 import * as path from 'path';
-import { makeTree } from '../typescript/makeTree2';
+import { Project } from 'ts-morph';
+import { makeTree } from '../typescript/makeTree';
 
 async function main() {
   const testProjectPath = path.resolve(__dirname, './unit/typescript/fixtures');

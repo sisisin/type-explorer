@@ -1,7 +1,7 @@
 import { Project } from 'ts-morph';
 import * as vscode from 'vscode';
 import { getPos } from '../file-utils/getPos';
-import { makeTree } from '../typescript/makeTree2';
+import { makeTree } from '../typescript/makeTree';
 import { TypeExplorerProvider } from './TypeExplorerProvider';
 
 export async function updateTreeView(
