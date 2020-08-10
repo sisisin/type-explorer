@@ -123,6 +123,16 @@ function isPrimitiveKeyword(node: ts.Node) {
     case ts.SyntaxKind.StringKeyword:
     case ts.SyntaxKind.NumberKeyword:
     case ts.SyntaxKind.SymbolKeyword:
+    case ts.SyntaxKind.NullKeyword:
+    case ts.SyntaxKind.UndefinedKeyword:
+    case ts.SyntaxKind.AnyKeyword:
+    case ts.SyntaxKind.UnknownKeyword:
+    case ts.SyntaxKind.BigIntKeyword:
+    case ts.SyntaxKind.ObjectKeyword:
+    case ts.SyntaxKind.ThisKeyword:
+    case ts.SyntaxKind.VoidKeyword:
+    case ts.SyntaxKind.NeverKeyword:
+    case ts.SyntaxKind.LiteralType:
       return true;
 
     default:

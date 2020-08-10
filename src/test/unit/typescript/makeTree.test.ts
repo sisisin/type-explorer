@@ -33,6 +33,15 @@ describe('primitive typed TypeAliasDeclaration', () => {
     { identifier: 'AliasOfString', childType: 'string' },
     { identifier: 'AliasOfNumber', childType: 'number' },
     { identifier: 'AliasOfSymbol', childType: 'symbol' },
+    { identifier: 'AliasOfNull', childType: 'null' },
+    { identifier: 'AliasOfUndefined', childType: 'undefined' },
+    { identifier: 'AliasOfAny', childType: 'any' },
+    { identifier: 'AliasOfUnknown', childType: 'unknown' },
+    { identifier: 'AliasOfBigInt', childType: 'bigint' },
+    { identifier: 'AliasOfObject', childType: 'object' },
+    { identifier: 'AliasOfVoid', childType: 'void' },
+    { identifier: 'AliasOfNever', childType: 'never' },
+    { identifier: 'AliasOfStringLiteral', childType: "'a_string_literal'" },
   ];
 
   parameters.forEach(({ identifier, childType }) => {
