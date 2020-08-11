@@ -1,4 +1,4 @@
-# type-explorer README
+# type-explorer
 
 Explorer for TypeScript's Type Aliases/interfaces
 \*This is alpha release
@@ -9,9 +9,10 @@ Display tree view of type alias/interface.
 
 ![demo](https://raw.githubusercontent.com/sisisin/type-explorer/master/assets/doc/demo.gif)
 
-<!--
 ## Known Issues
--->
+
+- There are some unsupported types
+- Cannot display types which is wrote into editor's buffer
 
 ## License
 
