@@ -9,7 +9,7 @@ type BarObject = {
   c: AliasOfBoolean;
 };
 
-type AliasOfBoolean = boolean;
+export type AliasOfBoolean = boolean;
 
 type BazObject = {
   baz: AliasOfString | string[];

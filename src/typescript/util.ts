@@ -54,7 +54,6 @@ function isTypeDefinitionNode(node: ts.Node) {
     ts.isTypeReferenceNode(node) ||
     ts.isUnionTypeNode(node) ||
     ts.isArrayTypeNode(node) ||
-    isSyntaxList(node) ||
     ts.isPropertySignature(node)
   );
 }
@@ -63,22 +62,16 @@ export function isSyntaxList(node: ts.Node): node is ts.SyntaxList {
   return node.kind === ts.SyntaxKind.SyntaxList;
 }
 
-type HasOneDeclarationAmongChildren =
-  | ts.TypeAliasDeclaration
-  | ts.PropertySignature
-  | ts.ArrayTypeNode
-  | ts.InterfaceDeclaration;
 /**
  * Find type definition node among children nodes
  * @example
  * type Foo = { foo: Bar }  // => returned `{ foo: Bar }`
  * @param node A type definition node
  */
-export function findDeclarationNode(node: HasOneDeclarationAmongChildren): ts.Node | undefined {
+export function findDeclarationNode(node: ts.Node): ts.Node | undefined {
   return node.getChildren().find(isTypeDefinitionNode);
 }
 
-type HasMultiDeclarationAmongChildren = HasOneDeclarationAmongChildren | ts.SyntaxList;
-export function findDeclarationNodes(node: HasMultiDeclarationAmongChildren): ts.Node[] {
+export function findDeclarationNodes(node: ts.Node): ts.Node[] {
   return node.getChildren().filter(isTypeDefinitionNode);
 }

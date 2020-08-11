@@ -52,6 +52,12 @@ describe('primitive typed TypeAliasDeclaration', () => {
       expect(dropId(actual)).toStrictEqual(tree);
     });
   });
+  it('should make tree from exported type', () => {
+    const tree = getPrimitiveTreeNode('ExportedType', 'unknown');
+    const { f, pos } = getArgPart(p, 'exported-type.ts', 'ExportedType');
+    const actual = makeTree(p, f, pos);
+    expect(dropId(actual)).toStrictEqual(tree);
+  });
 });
 
 describe('Literal Object typed TypeAliasDeclaration', () => {
