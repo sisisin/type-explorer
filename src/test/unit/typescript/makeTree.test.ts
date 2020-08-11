@@ -1,7 +1,7 @@
 import * as ts from 'typescript';
+import { TreeNodeLike } from '../../../types';
 import { makeTree } from '../../../typescript/makeTree';
-import { createProgram, getArgPart } from './helpers';
-import { TreeNode } from '../../../types';
+import { createProgram, dropId, getArgPart } from './helpers';
 
 let p: ts.Program;
 
@@ -18,12 +18,10 @@ describe('Unsupported Node', () => {
 describe('primitive typed TypeAliasDeclaration', () => {
   function getPrimitiveTreeNode(targetType: string, childType: string) {
     return {
-      id: expect.any(Number),
       typeName: targetType,
       variableName: undefined,
       children: [
         {
-          id: expect.any(Number),
           typeName: childType,
           variableName: undefined,
         },
@@ -35,51 +33,68 @@ describe('primitive typed TypeAliasDeclaration', () => {
     { identifier: 'AliasOfString', childType: 'string' },
     { identifier: 'AliasOfNumber', childType: 'number' },
     { identifier: 'AliasOfSymbol', childType: 'symbol' },
+    { identifier: 'AliasOfNull', childType: 'null' },
+    { identifier: 'AliasOfUndefined', childType: 'undefined' },
+    { identifier: 'AliasOfAny', childType: 'any' },
+    { identifier: 'AliasOfUnknown', childType: 'unknown' },
+    { identifier: 'AliasOfBigInt', childType: 'bigint' },
+    { identifier: 'AliasOfObject', childType: 'object' },
+    { identifier: 'AliasOfVoid', childType: 'void' },
+    { identifier: 'AliasOfNever', childType: 'never' },
+    { identifier: 'AliasOfStringLiteral', childType: "'a_string_literal'" },
   ];
 
   parameters.forEach(({ identifier, childType }) => {
     it(`should make tree from ${childType}`, () => {
       const tree = getPrimitiveTreeNode(identifier, childType);
       const { f, pos } = getArgPart(p, 'aliased-primitives.ts', identifier);
-      expect(makeTree(p, f, pos)).toMatchObject(tree);
+      const actual = makeTree(p, f, pos);
+      expect(dropId(actual)).toStrictEqual(tree);
     });
   });
 });
 
 describe('Literal Object typed TypeAliasDeclaration', () => {
   it(`should make tree from PropertySignature`, () => {
-    const tree: TreeNode = {
-      id: expect.any(Number),
+    const tree: TreeNodeLike = {
       typeName: 'string',
       variableName: 'foo',
+      children: [
+        {
+          typeName: 'string',
+          variableName: undefined,
+        },
+      ],
     };
     const { f, pos } = getArgPart(p, 'property-signature.ts', 'foo');
-    expect(makeTree(p, f, pos)).toMatchObject(tree);
+    const actual = makeTree(p, f, pos);
+    expect(dropId(actual)).toStrictEqual(tree);
   });
 
   it('should make tree from TypeAlias', () => {
-    const tree: TreeNode = {
-      id: expect.any(Number),
+    const tree: TreeNodeLike = {
       typeName: 'FooObject',
       variableName: undefined,
       children: [
         {
-          id: expect.any(Number),
           typeName: 'string',
           variableName: 'foo',
+          children: [
+            {
+              typeName: 'string',
+              variableName: undefined,
+            },
+          ],
         },
         {
-          id: expect.any(Number),
           typeName: 'AliasOfSomething',
           variableName: 'bar',
           children: [
             {
-              id: expect.any(Number),
               typeName: 'AliasOfSomething',
               variableName: undefined,
               children: [
                 {
-                  id: expect.any(Number),
                   typeName: 'symbol',
                   variableName: undefined,
                 },
@@ -90,31 +105,28 @@ describe('Literal Object typed TypeAliasDeclaration', () => {
       ],
     };
     const { f, pos } = getArgPart(p, 'property-signature.ts', 'FooObject');
-    expect(makeTree(p, f, pos)).toMatchObject(tree);
+    const actual = makeTree(p, f, pos);
+    expect(dropId(actual)).toStrictEqual(tree);
   });
 });
 
 describe('Union typed TypeAliasDeclaration', () => {
-  it('should make tree', () => {
-    const tree: TreeNode = {
-      id: expect.any(Number),
+  it('should make tree which has Union Attributes', () => {
+    const tree: TreeNodeLike = {
       typeName: 'U',
       variableName: undefined,
       children: [
         {
-          id: expect.any(Number),
           typeName: 'Alias',
           variableName: undefined,
           children: [
             {
-              id: expect.any(Number),
               typeName: 'string',
               variableName: undefined,
             },
           ],
         },
         {
-          id: expect.any(Number),
           typeName: 'number',
           variableName: undefined,
         },
@@ -122,6 +134,54 @@ describe('Union typed TypeAliasDeclaration', () => {
     };
     const { f, pos } = getArgPart(p, 'union.ts', 'U');
     const actual = makeTree(p, f, pos);
-    expect(actual).toMatchObject(tree);
+    expect(dropId(actual)).toStrictEqual(tree);
+  });
+});
+describe('Array typed TypeAliasDeclaration', () => {
+  it('should make tree which has Array type', () => {
+    const tree: TreeNodeLike = {
+      typeName: 'AliasOfArray',
+      variableName: undefined,
+      children: [
+        {
+          typeName: 'AliasOfBoolean[]',
+          variableName: undefined,
+          children: [
+            {
+              typeName: 'AliasOfBoolean',
+              variableName: undefined,
+              children: [{ typeName: 'boolean', variableName: undefined }],
+            },
+          ],
+        },
+      ],
+    };
+    const { f, pos } = getArgPart(p, 'aliased-array.ts', 'AliasOfArray');
+    const actual = makeTree(p, f, pos);
+    expect(dropId(actual)).toStrictEqual(tree);
+  });
+});
+
+describe('InterfaceDeclaration', () => {
+  const tree: TreeNodeLike = {
+    typeName: 'FooInterface',
+    variableName: undefined,
+    children: [
+      {
+        typeName: 'string',
+        variableName: 'foo',
+        children: [
+          {
+            typeName: 'string',
+            variableName: undefined,
+          },
+        ],
+      },
+    ],
+  };
+  it('should make tree from basic interface', () => {
+    const { f, pos } = getArgPart(p, 'interface.ts', 'FooInterface');
+    const actual = makeTree(p, f, pos);
+    expect(dropId(actual)).toStrictEqual(tree);
   });
 });
