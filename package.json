@@ -1,6 +1,6 @@
 {
   "name": "type-explorer",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "publisher": "sisisin",
   "engines": {
     "vscode": "^1.47.0"
