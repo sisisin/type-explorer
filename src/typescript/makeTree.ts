@@ -6,7 +6,7 @@ import {
   findDeclarationNodes,
   findDeclarationNode,
   isSyntaxList,
-} from './util';
+} from './utils';
 import { isNonNullable, assert, getIdGenerator } from '../utils';
 
 export function makeTree(program: ts.Program, src: ts.SourceFile, pos: number) {
