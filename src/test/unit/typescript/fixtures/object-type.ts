@@ -13,5 +13,9 @@ export type AliasOfBoolean = boolean;
 
 type BazObject = {
   baz: AliasOfString | string[];
+  boo: {
+    a: 1;
+    b: '';
+  };
 };
 type AliasOfString = string;
