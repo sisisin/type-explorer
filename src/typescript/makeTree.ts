@@ -50,7 +50,7 @@ function from(ctx: Context, node: ts.Node): TreeNode | undefined {
   if (ts.isTypeAliasDeclaration(node)) {
     return {
       id: genId(),
-      typeName: node.name.getText(), // type Some = ... <- `Some` can access `node.name`
+      typeName: node.name.getText(),
       variableName: undefined,
       ...makeChildren(ctx, node),
     };
@@ -80,11 +80,17 @@ function from(ctx: Context, node: ts.Node): TreeNode | undefined {
   } else if (ts.isInterfaceDeclaration(node)) {
     const syntaxList = node.getChildren().find(isSyntaxList);
     if (syntaxList === undefined) throw new Error(`${node.name.getText()} has not SyntaxList`);
+    const children = findDeclarationNodes(syntaxList)
+      .map((body) => from(ctx, body))
+      .filter(isNonNullable);
+    const childrenObj: Pick<TreeNode, 'children'> = {
+      children: children.length > 0 ? children : undefined,
+    };
     return {
       id: genId(),
       typeName: node.name.getText(),
       variableName: undefined,
-      ...makeChildren(ctx, syntaxList),
+      ...childrenObj,
     };
   }
 
@@ -132,10 +138,6 @@ function makeChildrenList(ctx: Context, node: ChildrenNode): TreeNode[] {
     return [from(ctx, declarationBody)].filter(isNonNullable);
   } else if (isSyntaxList(declarationBody)) {
     return findDeclarationNodes(declarationBody)
-      .map((body) => from(ctx, body))
-      .filter(isNonNullable);
-  } else if (isSyntaxList(node)) {
-    return findDeclarationNodes(node)
       .map((body) => from(ctx, body))
       .filter(isNonNullable);
   }
