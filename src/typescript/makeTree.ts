@@ -1,13 +1,7 @@
 import * as ts from 'typescript';
 import { TreeNode } from '../types';
 import { assert, getIdGenerator, isNonNullable } from '../utils';
-import {
-  findDeclarationNode,
-  findDeclarationNodes,
-  getDescendantAtPos,
-  isPrimitiveKeyword,
-  isSyntaxList,
-} from './utils';
+import { findDeclarationNode, getDescendantAtPos, isPrimitiveKeyword } from './utils';
 
 export function makeTree(program: ts.Program, src: ts.SourceFile, pos: number) {
   const checker = program.getTypeChecker();
@@ -53,13 +47,11 @@ function from(ctx: Context, node: ts.Node): TreeNode | undefined {
   const { genId, checker, root } = ctx;
 
   if (ts.isTypeAliasDeclaration(node)) {
-    const declarationBody = findDeclarationNode(node);
-
     return {
       id: genId(),
       typeName: node.name.getText(),
       variableName: undefined,
-      ...makeChildren(ctx, declarationBody),
+      ...makeChildren(ctx, node.type),
     };
   } else if (isPrimitiveKeyword(node)) {
     return {
@@ -68,22 +60,20 @@ function from(ctx: Context, node: ts.Node): TreeNode | undefined {
       variableName: undefined,
     };
   } else if (ts.isPropertySignature(node)) {
-    const declarationBody = findDeclarationNode(node);
     return {
       id: genId(),
       typeName: node.type?.getText() ?? assert('TypeNode must not be undefined'),
       variableName: node.name.getText(),
-      ...makeChildren(ctx, declarationBody),
+      ...makeChildren(ctx, node.type),
     };
   } else if (ts.isTypeReferenceNode(node)) {
     return fromTypeReferenceNode(ctx, node);
   } else if (ts.isArrayTypeNode(node)) {
-    const declarationBody = findDeclarationNode(node);
     return {
       id: genId(),
       typeName: node.getText(),
       variableName: undefined,
-      ...makeChildren(ctx, declarationBody),
+      ...makeChildren(ctx, node.elementType),
     };
   } else if (ts.isInterfaceDeclaration(node)) {
     return {
@@ -106,6 +96,7 @@ function from(ctx: Context, node: ts.Node): TreeNode | undefined {
       id: genId(),
       typeName: checker.typeToString(checker.getTypeAtLocation(node)),
       variableName: node.name.getText(),
+      ...makeChildren(ctx, node.initializer),
     };
   }
 
@@ -180,18 +171,9 @@ function makeChildrenList(ctx: Context, node: ts.Node | undefined): TreeNode[] {
   } else if (ts.isTypeReferenceNode(node)) {
     return [from(ctx, node)].filter(isNonNullable);
   } else if (ts.isUnionTypeNode(node)) {
-    const syntaxList = node.getChildren()[0];
-    if (isSyntaxList(syntaxList)) {
-      return findDeclarationNodes(syntaxList)
-        .map((body) => from(ctx, body))
-        .filter(isNonNullable);
-    }
+    return node.types.map((t) => from(ctx, t)).filter(isNonNullable);
   } else if (ts.isArrayTypeNode(node)) {
     return [from(ctx, node)].filter(isNonNullable);
-  } else if (isSyntaxList(node)) {
-    return findDeclarationNodes(node)
-      .map((body) => from(ctx, body))
-      .filter(isNonNullable);
   } else if (ts.isTypeLiteralNode(node)) {
     return node.members.map((m) => from(ctx, m)).filter(isNonNullable);
   } else if (ts.isObjectLiteralExpression(node)) {

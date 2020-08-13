@@ -62,10 +62,6 @@ function isTypeDefinitionNode(node: ts.Node) {
   );
 }
 
-export function isSyntaxList(node: ts.Node): node is ts.SyntaxList {
-  return node.kind === ts.SyntaxKind.SyntaxList;
-}
-
 /**
  * Find type definition node among children nodes
  * @example
@@ -74,8 +70,4 @@ export function isSyntaxList(node: ts.Node): node is ts.SyntaxList {
  */
 export function findDeclarationNode(node: ts.Node): ts.Node | undefined {
   return node.getChildren().find(isTypeDefinitionNode);
-}
-
-export function findDeclarationNodes(node: ts.Node): ts.Node[] {
-  return node.getChildren().filter(isTypeDefinitionNode);
 }
