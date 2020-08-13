@@ -1,13 +1,13 @@
 import * as ts from 'typescript';
 import { TreeNode } from '../types';
+import { assert, getIdGenerator, isNonNullable } from '../utils';
 import {
+  findDeclarationNode,
+  findDeclarationNodes,
   getDescendantAtPos,
   isPrimitiveKeyword,
-  findDeclarationNodes,
-  findDeclarationNode,
   isSyntaxList,
 } from './utils';
-import { isNonNullable, assert, getIdGenerator } from '../utils';
 
 export function makeTree(program: ts.Program, src: ts.SourceFile, pos: number) {
   const checker = program.getTypeChecker();
@@ -126,19 +126,21 @@ function fromVariableDeclaration(ctx: Context, node: ts.VariableDeclaration) {
 
   // case of `const foo: Foo = ...`
   if (node.type) {
+    const reference = type.aliasSymbol?.getDeclarations()?.[0]!;
+    const decl = findDeclarationNode(reference);
     return {
       id: genId(),
       typeName: node.type.getText(),
       variableName: node.name.getText(),
-      ...makeChildren(ctx, type.aliasSymbol?.getDeclarations()?.[0] as ChildrenNode),
+      ...makeChildren(ctx, decl),
     };
   }
 
-  const nodeFromType = checker.typeToTypeNode(type);
-  if (nodeFromType === undefined) return undefined;
+  const typeNode = checker.typeToTypeNode(type);
+  if (typeNode === undefined) return undefined;
 
   // case of `let x = 1; // => inferred a number type`
-  if (isPrimitiveKeyword(nodeFromType)) {
+  if (isPrimitiveKeyword(typeNode)) {
     return {
       id: genId(),
       typeName: checker.typeToString(type),
@@ -147,20 +149,18 @@ function fromVariableDeclaration(ctx: Context, node: ts.VariableDeclaration) {
   }
 
   // case of `const obj = {...}`. Right side expression is TypeLiteral node.
-  if (ts.isTypeLiteralNode(nodeFromType)) {
-    const objliteral = node.getChildren().find((n) => ts.isObjectLiteralExpression(n))!;
-    const syntaxList = objliteral.getChildren().find((n) => isSyntaxList(n))!;
-    const propertyAssignments = syntaxList.getChildren().filter(ts.isPropertyAssignment);
-    console.log(checker.typeToString(checker.getTypeAtLocation(propertyAssignments[0])));
+  if (ts.isTypeLiteralNode(typeNode)) {
+    const obj = node.forEachChild((n) => (ts.isObjectLiteralExpression(n) ? n : undefined));
+    if (obj === undefined)
+      throw new Error(
+        `Unexpected undefined. TypeLiteralNode should have a ObjectLiteralExpression`,
+      );
 
-    const childrenObj: Pick<TreeNode, 'children'> = {
-      children: propertyAssignments.map((p) => from(ctx, p)).filter(isNonNullable),
-    };
     return {
       id: genId(),
       typeName: 'Anonymous(Object Literal)',
       variableName: node.name.getText(),
-      ...childrenObj,
+      ...makeChildren(ctx, obj),
     };
   }
 }
@@ -181,9 +181,6 @@ function makeChildren(ctx: Context, node: ts.Node | undefined): Pick<TreeNode, '
 
 function makeChildrenList(ctx: Context, node: ts.Node | undefined): TreeNode[] {
   if (node === undefined) return [];
-  if (ts.isTypeLiteralNode(node)) {
-    return node.members.map((m) => from(ctx, m)).filter(isNonNullable);
-  }
   if (isPrimitiveKeyword(node)) {
     return [from(ctx, node)].filter(isNonNullable);
   } else if (ts.isTypeLiteralNode(node)) {
@@ -203,6 +200,11 @@ function makeChildrenList(ctx: Context, node: ts.Node | undefined): TreeNode[] {
     return findDeclarationNodes(node)
       .map((body) => from(ctx, body))
       .filter(isNonNullable);
+  } else if (ts.isTypeLiteralNode(node)) {
+    return node.members.map((m) => from(ctx, m)).filter(isNonNullable);
+  } else if (ts.isObjectLiteralExpression(node)) {
+    return node.properties.map((p) => from(ctx, p)).filter(isNonNullable);
   }
+
   return [];
 }

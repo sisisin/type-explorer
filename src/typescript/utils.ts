@@ -3,6 +3,9 @@ import * as ts from 'typescript';
 function getKindName(node: ts.Node) {
   return ts.SyntaxKind[node?.kind];
 }
+export function contain(node: ts.Node, pos: number) {
+  return node.pos <= pos && pos < node.end;
+}
 export function getDescendantAtPos(node: ts.Node, pos: number) {
   let ret: ts.Node | undefined;
 
@@ -12,9 +15,6 @@ export function getDescendantAtPos(node: ts.Node, pos: number) {
     ret = next;
   }
 }
-export function contain(node: ts.Node, pos: number) {
-  return node.pos <= pos && pos < node.end;
-}
 export function getChildAtPos(node: ts.Node, pos: number) {
   if (contain(node, pos)) {
     for (const child of node.getChildren()) {
@@ -23,7 +23,11 @@ export function getChildAtPos(node: ts.Node, pos: number) {
   }
   return undefined;
 }
-
+export function forEachChildArray(node: ts.Node): ts.Node[] {
+  const nodes: ts.Node[] = [];
+  node.forEachChild((n) => nodes.push(n));
+  return nodes;
+}
 export function isPrimitiveKeyword(node: ts.Node) {
   switch (node.kind) {
     case ts.SyntaxKind.BooleanKeyword:

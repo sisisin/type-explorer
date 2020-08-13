@@ -1,7 +1,7 @@
 import * as path from 'path';
 import { Project } from 'ts-morph';
 import { makeTree } from '../typescript/makeTree';
-import { getDescendantAtPos } from '../typescript/util';
+import { getDescendantAtPos } from '../typescript/utils';
 import * as ts from 'typescript';
 
 const testProjectPath = path.resolve(__dirname, './unit/typescript/fixtures');
