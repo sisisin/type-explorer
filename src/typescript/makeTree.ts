@@ -86,19 +86,11 @@ function from(ctx: Context, node: ts.Node): TreeNode | undefined {
       ...makeChildren(ctx, declarationBody),
     };
   } else if (ts.isInterfaceDeclaration(node)) {
-    const syntaxList = node.getChildren().find(isSyntaxList);
-    if (syntaxList === undefined) throw new Error(`${node.name.getText()} has not SyntaxList`);
-    const children = findDeclarationNodes(syntaxList)
-      .map((body) => from(ctx, body))
-      .filter(isNonNullable);
-    const childrenObj: Pick<TreeNode, 'children'> = {
-      children: children.length > 0 ? children : undefined,
-    };
     return {
       id: genId(),
       typeName: node.name.getText(),
       variableName: undefined,
-      ...childrenObj,
+      ...makeChildren(ctx, node),
     };
   } else if (ts.isVariableDeclaration(node)) {
     return fromVariableDeclaration(ctx, node);
@@ -204,6 +196,8 @@ function makeChildrenList(ctx: Context, node: ts.Node | undefined): TreeNode[] {
     return node.members.map((m) => from(ctx, m)).filter(isNonNullable);
   } else if (ts.isObjectLiteralExpression(node)) {
     return node.properties.map((p) => from(ctx, p)).filter(isNonNullable);
+  } else if (ts.isInterfaceDeclaration(node)) {
+    return node.members.map((m) => from(ctx, m)).filter(isNonNullable);
   }
 
   return [];
