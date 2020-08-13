@@ -24,6 +24,7 @@ export function makeTree(program: ts.Program, src: ts.SourceFile, pos: number) {
   function isTreeNodeStartingPoint(node: ts.Node) {
     return (
       ts.isPropertySignature(node) ||
+      ts.isPropertyAssignment(node) ||
       ts.isTypeAliasDeclaration(node) ||
       ts.isInterfaceDeclaration(node) ||
       ts.isVariableDeclaration(node) // note: it is unsupported `VariableDeclarationList`
