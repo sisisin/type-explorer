@@ -266,3 +266,27 @@ describe('VariableDeclaration', () => {
     });
   });
 });
+
+describe('FunctionDeclaration', () => {
+  it('should make tree with explicitly return type', () => {
+    const tree: TreeNodeLike = {
+      variableName: 'something',
+      typeName: 'string',
+    };
+    const { f, pos } = getArgPart(p, 'function.ts', 'something');
+    const actual = makeTree(p, f, pos);
+    expect(dropId(actual)).toStrictEqual(tree);
+  });
+  it('should make tree with implicitly return type', () => {
+    pending(
+      "unsupported inferred return type because I can't understand to get return type from node",
+    );
+    const tree: TreeNodeLike = {
+      variableName: 'somethingInferred',
+      typeName: 'boolean',
+    };
+    const { f, pos } = getArgPart(p, 'function.ts', 'somethingInferred');
+    const actual = makeTree(p, f, pos);
+    expect(dropId(actual)).toStrictEqual(tree);
+  });
+});

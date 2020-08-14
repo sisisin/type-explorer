@@ -27,7 +27,8 @@ export function makeTree(program: ts.Program, src: ts.SourceFile, pos: number) {
       ts.isPropertyAssignment(node) ||
       ts.isTypeAliasDeclaration(node) ||
       ts.isInterfaceDeclaration(node) ||
-      ts.isVariableDeclaration(node) // note: it is unsupported `VariableDeclarationList`
+      ts.isVariableDeclaration(node) || // note: it is unsupported `VariableDeclarationList`
+      ts.isFunctionDeclaration(node)
     );
   }
   function findTreeNodeStartingPoint(node: ts.Node): ts.Node | undefined {
@@ -92,6 +93,14 @@ function from(ctx: Context, node: ts.Node): TreeNode | undefined {
       variableName: ts.getNameOfDeclaration(node)?.getText(),
       ...makeChildren(ctx, node.initializer),
     };
+  } else if (ts.isFunctionDeclaration(node)) {
+    if (node.type) {
+      return {
+        id: genId(),
+        typeName: node.type.getText(),
+        variableName: node.name?.getText() ?? 'Anonymous Function',
+      };
+    }
   }
 
   return undefined;
