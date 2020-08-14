@@ -17,7 +17,7 @@ export function getDescendantAtPos(node: ts.Node, pos: number) {
 }
 export function getChildAtPos(node: ts.Node, pos: number) {
   if (contain(node, pos)) {
-    for (const child of node.getChildren()) {
+    for (const child of forEachChildArray(node)) {
       if (contain(child, pos)) return child;
     }
   }
@@ -25,7 +25,9 @@ export function getChildAtPos(node: ts.Node, pos: number) {
 }
 export function forEachChildArray(node: ts.Node): ts.Node[] {
   const nodes: ts.Node[] = [];
-  node.forEachChild((n) => nodes.push(n));
+  node.forEachChild((n) => {
+    nodes.push(n);
+  });
   return nodes;
 }
 export function isPrimitiveKeyword(node: ts.Node) {
@@ -49,25 +51,4 @@ export function isPrimitiveKeyword(node: ts.Node) {
     default:
       return false;
   }
-}
-
-function isTypeDefinitionNode(node: ts.Node) {
-  return (
-    isPrimitiveKeyword(node) ||
-    ts.isTypeLiteralNode(node) ||
-    ts.isTypeReferenceNode(node) ||
-    ts.isUnionTypeNode(node) ||
-    ts.isArrayTypeNode(node) ||
-    ts.isPropertySignature(node)
-  );
-}
-
-/**
- * Find type definition node among children nodes
- * @example
- * type Foo = { foo: Bar }  // => returned `{ foo: Bar }`
- * @param node A type definition node
- */
-export function findDeclarationNode(node: ts.Node): ts.Node | undefined {
-  return node.getChildren().find(isTypeDefinitionNode);
 }

@@ -1,7 +1,7 @@
 import * as ts from 'typescript';
 import { TreeNode } from '../types';
-import { assert, getIdGenerator, isNonNullable } from '../utils';
-import { findDeclarationNode, getDescendantAtPos, isPrimitiveKeyword } from './utils';
+import { assert, getIdGenerator, isNonNullable, getOrThrow } from '../utils';
+import { getDescendantAtPos, isPrimitiveKeyword } from './utils';
 
 export function makeTree(program: ts.Program, src: ts.SourceFile, pos: number) {
   const checker = program.getTypeChecker();
@@ -45,12 +45,12 @@ export interface Context {
 }
 
 function from(ctx: Context, node: ts.Node): TreeNode | undefined {
-  const { genId, checker, root } = ctx;
+  const { genId, checker } = ctx;
 
   if (ts.isTypeAliasDeclaration(node)) {
     return {
       id: genId(),
-      typeName: node.name.getText(),
+      typeName: getOrThrow(ts.getNameOfDeclaration(node)?.getText()),
       variableName: undefined,
       ...makeChildren(ctx, node.type),
     };
@@ -64,7 +64,7 @@ function from(ctx: Context, node: ts.Node): TreeNode | undefined {
     return {
       id: genId(),
       typeName: node.type?.getText() ?? assert('TypeNode must not be undefined'),
-      variableName: node.name.getText(),
+      variableName: ts.getNameOfDeclaration(node)?.getText(),
       ...makeChildren(ctx, node.type),
     };
   } else if (ts.isTypeReferenceNode(node)) {
@@ -79,24 +79,17 @@ function from(ctx: Context, node: ts.Node): TreeNode | undefined {
   } else if (ts.isInterfaceDeclaration(node)) {
     return {
       id: genId(),
-      typeName: node.name.getText(),
+      typeName: getOrThrow(ts.getNameOfDeclaration(node)?.getText()),
       variableName: undefined,
       ...makeChildren(ctx, node),
     };
   } else if (ts.isVariableDeclaration(node)) {
     return fromVariableDeclaration(ctx, node);
-  } else if (ts.isTypeLiteralNode(node)) {
-    return {
-      id: genId(),
-      typeName: 'Anonymous(Object Literal)',
-      variableName: (root as ts.VariableDeclaration).name.getText(),
-      ...makeChildren(ctx, node),
-    };
   } else if (ts.isPropertyAssignment(node)) {
     return {
       id: genId(),
       typeName: checker.typeToString(checker.getTypeAtLocation(node)),
-      variableName: node.name.getText(),
+      variableName: ts.getNameOfDeclaration(node)?.getText(),
       ...makeChildren(ctx, node.initializer),
     };
   }
@@ -111,12 +104,14 @@ function fromVariableDeclaration(ctx: Context, node: ts.VariableDeclaration) {
   // case of `const foo: Foo = ...`
   if (node.type) {
     const reference = type.aliasSymbol?.getDeclarations()?.[0]!;
-    const decl = findDeclarationNode(reference);
+    // get rid of declaration result because duplicate tree node between TypeReference and Declaration
+    const tree = from(ctx, reference);
+
     return {
       id: genId(),
       typeName: node.type.getText(),
-      variableName: node.name.getText(),
-      ...makeChildren(ctx, decl),
+      variableName: ts.getNameOfDeclaration(node)?.getText(),
+      ...(tree?.children ? { children: tree.children } : {}),
     };
   }
 
@@ -128,7 +123,7 @@ function fromVariableDeclaration(ctx: Context, node: ts.VariableDeclaration) {
     return {
       id: genId(),
       typeName: checker.typeToString(type),
-      variableName: node.name.getText(),
+      variableName: ts.getNameOfDeclaration(node)?.getText(),
     };
   }
 
@@ -143,7 +138,7 @@ function fromVariableDeclaration(ctx: Context, node: ts.VariableDeclaration) {
     return {
       id: genId(),
       typeName: 'Anonymous(Object Literal)',
-      variableName: node.name.getText(),
+      variableName: ts.getNameOfDeclaration(node)?.getText(),
       ...makeChildren(ctx, obj),
     };
   }
@@ -151,8 +146,7 @@ function fromVariableDeclaration(ctx: Context, node: ts.VariableDeclaration) {
 function fromTypeReferenceNode(ctx: Context, node: ts.TypeReferenceNode) {
   // todo: improve get node
   const { checker } = ctx;
-  const identifier = node.getChildren()[0];
-  const symbol = checker.getSymbolAtLocation(identifier);
+  const symbol = checker.getSymbolAtLocation(node.typeName);
   const declNode = symbol?.getDeclarations()?.[0];
   if (declNode === undefined) return undefined;
   return from(ctx, declNode);
