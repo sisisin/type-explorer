@@ -265,6 +265,17 @@ describe('VariableDeclaration', () => {
       expect(dropId(actual)).toStrictEqual(tree);
     });
   });
+  describe('call expression', () => {
+    const tree: TreeNodeLike = {
+      typeName: 'string',
+      variableName: 'called',
+    };
+    it('should make tree from call expression result', () => {
+      const { f, pos } = getArgPart(p, 'variable-declaration.ts', 'called');
+      const actual = makeTree(p, f, pos);
+      expect(dropId(actual)).toStrictEqual(tree);
+    });
+  });
 });
 
 describe('FunctionDeclaration', () => {

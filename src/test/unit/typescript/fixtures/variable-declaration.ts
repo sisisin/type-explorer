@@ -9,3 +9,5 @@ const fooLike = {
   foo: '',
   bar: Symbol(),
 };
+
+const called = something();
