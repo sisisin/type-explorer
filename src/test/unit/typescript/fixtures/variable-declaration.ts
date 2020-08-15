@@ -9,3 +9,7 @@ const fooLike = {
   foo: '',
   bar: Symbol(),
 };
+
+const called = something();
+
+const gotFooObject = getFooObject();

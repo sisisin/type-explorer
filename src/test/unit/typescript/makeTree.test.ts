@@ -192,77 +192,26 @@ describe('InterfaceDeclaration', () => {
   });
 });
 
-describe('VariableDeclaration', () => {
-  describe('number declaration', () => {
+describe('FunctionDeclaration', () => {
+  it('should make tree with explicitly return type', () => {
     const tree: TreeNodeLike = {
-      typeName: 'number',
-      variableName: 'numberDeclaration',
+      variableName: 'something',
+      typeName: 'string',
     };
-    it('should make tree from Number Declaration', () => {
-      const { f, pos } = getArgPart(p, 'variable-declaration.ts', 'numberDeclaration');
-      const actual = makeTree(p, f, pos);
-      expect(dropId(actual)).toStrictEqual(tree);
-    });
+    const { f, pos } = getArgPart(p, 'function.ts', 'something');
+    const actual = makeTree(p, f, pos);
+    expect(dropId(actual)).toStrictEqual(tree);
   });
-  describe('object literal with TypeReference annotation', () => {
+  it('should make tree with implicitly return type', () => {
+    pending(
+      "unsupported inferred return type because I can't understand to get return type from node",
+    );
     const tree: TreeNodeLike = {
-      typeName: 'FooObject',
-      variableName: 'fooObject',
-      children: [
-        {
-          typeName: 'string',
-          variableName: 'foo',
-          children: [
-            {
-              typeName: 'string',
-              variableName: undefined,
-            },
-          ],
-        },
-        {
-          typeName: 'AliasOfSomething',
-          variableName: 'bar',
-          children: [
-            {
-              typeName: 'AliasOfSomething',
-              variableName: undefined,
-              children: [
-                {
-                  typeName: 'symbol',
-                  variableName: undefined,
-                },
-              ],
-            },
-          ],
-        },
-      ],
+      variableName: 'somethingInferred',
+      typeName: 'boolean',
     };
-    it('should make tree from object literal with TypeReference', () => {
-      const { f, pos } = getArgPart(p, 'variable-declaration.ts', 'fooObject');
-      const actual = makeTree(p, f, pos);
-      expect(dropId(actual)).toStrictEqual(tree);
-    });
-  });
-
-  describe('from object literal', () => {
-    const tree: TreeNodeLike = {
-      typeName: 'Anonymous(Object Literal)',
-      variableName: 'fooLike',
-      children: [
-        {
-          typeName: 'string',
-          variableName: 'foo',
-        },
-        {
-          typeName: 'symbol',
-          variableName: 'bar',
-        },
-      ],
-    };
-    it('should make tree from object literal', () => {
-      const { f, pos } = getArgPart(p, 'variable-declaration.ts', 'fooLike');
-      const actual = makeTree(p, f, pos);
-      expect(dropId(actual)).toStrictEqual(tree);
-    });
+    const { f, pos } = getArgPart(p, 'function.ts', 'somethingInferred');
+    const actual = makeTree(p, f, pos);
+    expect(dropId(actual)).toStrictEqual(tree);
   });
 });

@@ -8,15 +8,13 @@ export function getArgPart(
   p: ts.Program,
   target: string,
   identifier: string,
-): { f: ts.SourceFile; pos: number };
-export function getArgPart(p: ts.Program, target: string): { f: ts.SourceFile };
-export function getArgPart(p: ts.Program, target: string, identifier?: string) {
+): { f: ts.SourceFile; pos: number } {
   const targetPath = path.resolve(fixtureProject, target);
   const f = p.getSourceFile(targetPath);
   if (f === undefined) throw new Error(`cannot find SourceFile: ${targetPath}`);
   return {
     f,
-    pos: identifier === undefined ? undefined : f.getText().indexOf(identifier),
+    pos: f.getText().indexOf(identifier),
   };
 }
 
