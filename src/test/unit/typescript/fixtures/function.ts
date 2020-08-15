@@ -5,3 +5,7 @@ function something(): string {
 function somethingInferred() {
   return true;
 }
+
+function getFooObject(): FooObject {
+  return {} as any;
+}

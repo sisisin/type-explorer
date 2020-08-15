@@ -106,25 +106,10 @@ function from(ctx: Context, node: ts.Node): TreeNode | undefined {
   return undefined;
 }
 
-function fromVariableDeclaration(ctx: Context, node: ts.VariableDeclaration) {
+function fromVariableDeclaration(ctx: Context, node: ts.VariableDeclaration): TreeNode | undefined {
   const { genId, checker } = ctx;
   const type = checker.getTypeAtLocation(node);
-
-  // case of `const foo: Foo = ...`
-  if (node.type) {
-    const reference = type.aliasSymbol?.getDeclarations()?.[0]!;
-    // get rid of declaration result because duplicate tree node between TypeReference and Declaration
-    const tree = from(ctx, reference);
-
-    return {
-      id: genId(),
-      typeName: node.type.getText(),
-      variableName: ts.getNameOfDeclaration(node)?.getText(),
-      ...(tree?.children ? { children: tree.children } : {}),
-    };
-  }
-
-  const typeNode = checker.typeToTypeNode(type);
+  const typeNode = node.type ?? checker.typeToTypeNode(type);
   if (typeNode === undefined) return undefined;
 
   // case of `let x = 1; // => inferred a number type`
@@ -135,14 +120,11 @@ function fromVariableDeclaration(ctx: Context, node: ts.VariableDeclaration) {
       variableName: ts.getNameOfDeclaration(node)?.getText(),
     };
   }
-
   // case of `const obj = {...}`. Right side expression is TypeLiteral node.
-  if (ts.isTypeLiteralNode(typeNode)) {
-    const obj = node.forEachChild((n) => (ts.isObjectLiteralExpression(n) ? n : undefined));
-    if (obj === undefined)
-      throw new Error(
-        `Unexpected undefined. TypeLiteralNode should have a ObjectLiteralExpression`,
-      );
+  else if (ts.isTypeLiteralNode(typeNode)) {
+    const obj = getOrThrow(
+      node.forEachChild((n) => (ts.isObjectLiteralExpression(n) ? n : undefined)),
+    );
 
     return {
       id: genId(),
@@ -150,7 +132,25 @@ function fromVariableDeclaration(ctx: Context, node: ts.VariableDeclaration) {
       variableName: ts.getNameOfDeclaration(node)?.getText(),
       ...makeChildren(ctx, obj),
     };
+
+    /**
+     * case of
+     * - `const x = something()` and `something` result type is TypeReference
+     * - `const foo: Foo = ...`
+     */
+  } else if (ts.isTypeReferenceNode(typeNode)) {
+    const reference = type.aliasSymbol?.getDeclarations()?.[0]!;
+    // get rid of declaration result because duplicate tree node between TypeReference and Declaration
+    const tree = from(ctx, reference);
+
+    return {
+      id: genId(),
+      typeName: getOrThrow(ts.getNameOfDeclaration(reference)?.getText()),
+      variableName: ts.getNameOfDeclaration(node)?.getText(),
+      ...(tree?.children ? { children: tree.children } : {}),
+    };
   }
+  return undefined;
 }
 function fromTypeReferenceNode(ctx: Context, node: ts.TypeReferenceNode) {
   // todo: improve get node

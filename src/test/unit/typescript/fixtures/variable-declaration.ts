@@ -11,3 +11,5 @@ const fooLike = {
 };
 
 const called = something();
+
+const gotFooObject = getFooObject();
